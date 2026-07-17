@@ -9,12 +9,18 @@ export interface Product {
   material: string;
   gemstone?: string;
   collection: string;
+  collectionIds: string[];
   category: string;
+  categoryId: number;
+  categoryLabel: string;
   image: string;
   images?: string[];
   isNew?: boolean;
   isBestSeller?: boolean;
+  isFeatured?: boolean;
   inStock: boolean;
+  status: "active" | "out_of_stock" | "inactive" | "archived";
+  badges: string[];
   description: string;
   descriptionHtml?: string;
   colors?: ProductOption[];
@@ -128,6 +134,10 @@ interface BackendProduct {
   name: string;
   price: number | string | null;
   new_price?: number | string | null;
+  status?: "active" | "out_of_stock" | "inactive" | "archived" | null;
+  badges?: unknown;
+  collection_ids?: unknown;
+  collections?: Array<{ id?: number; name?: string | null }>;
   info?: unknown;
   description?: string | null;
   description_html?: string | null;
@@ -188,11 +198,10 @@ interface BackendBlog {
 
 type Resource<T> = { data: T } | T;
 
-const TOKEN_STORAGE_KEY = "areni.shop.tokens";
-const DEFAULT_PRODUCT_IMAGE =
-  "https://images.unsplash.com/photo-1626784214536-d859187e0bd0?w=600&h=720&fit=crop&auto=format";
-const DEFAULT_COLLECTION_IMAGE =
-  "https://images.unsplash.com/photo-1688406264720-e2f9389c9ed1?w=800&h=1000&fit=crop&auto=format";
+const TOKEN_STORAGE_KEY = "zarder.shop.tokens";
+const LEGACY_TOKEN_STORAGE_KEY = "areni.shop.tokens";
+const DEFAULT_PRODUCT_IMAGE = `${import.meta.env.BASE_URL}drakht/logo-web.png`;
+const DEFAULT_COLLECTION_IMAGE = `${import.meta.env.BASE_URL}drakht/logo-web.png`;
 
 export class ApiError extends Error {
   status: number;
@@ -214,7 +223,8 @@ export function readTokens(): AuthTokens | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const value = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+    const value = window.localStorage.getItem(TOKEN_STORAGE_KEY)
+      ?? window.localStorage.getItem(LEGACY_TOKEN_STORAGE_KEY);
     return value ? (JSON.parse(value) as AuthTokens) : null;
   } catch {
     return null;
@@ -232,11 +242,13 @@ export function storeTokens(tokens: AuthTokens): void {
       expires_in: tokens.expires_in,
     }),
   );
+  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
 }
 
 export function clearTokens(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_TOKEN_STORAGE_KEY);
 }
 
 function unwrapData<T>(payload: Resource<T>): T {
@@ -380,10 +392,10 @@ export async function updateProfile(payload: Omit<UserProfile, "id">): Promise<U
 export async function getAppInfo(): Promise<ShopInfo> {
   const data = unwrapData(await shopRequest<Resource<BackendAppInfo>>(`/app/get/${shopConfig.appId}`));
   return {
-    name: data.name?.trim() || "Areni Armenian Jewels",
-    email: data.email?.trim() || "hello@areni.am",
-    phone: data.phone?.trim() || "+374 10 52 84 00",
-    address: data.address?.trim() || "14 Abovyan Street, Yerevan 0001, Republic of Armenia",
+    name: data.name?.trim() || "Zarder",
+    email: data.email?.trim() || "",
+    phone: data.phone?.trim() || "",
+    address: data.address?.trim() || "",
     telegramChatId: data.telegram_chat_id ? String(data.telegram_chat_id) : undefined,
   };
 }
@@ -414,20 +426,10 @@ export async function getProduct(productId: number): Promise<Product> {
   return mapBackendProduct(unwrapData(await shopRequest<Resource<BackendProduct>>(`/product/${productId}`)));
 }
 
-export async function searchProducts(query: string): Promise<Product[]> {
-  const trimmed = query.trim();
-  if (!trimmed) return [];
-
-  const data = unwrapData(
-    await shopRequest<Resource<BackendProduct[]>>(`/product/search/${encodeURIComponent(trimmed)}`),
-  );
-  return data.map((product) => mapBackendProduct(product));
-}
-
 export async function getAboutPage(): Promise<AboutContent> {
   const data = unwrapData(await shopRequest<Resource<BackendAboutPage>>(`/about-pages/${shopConfig.appId}`));
   return {
-    title: data.title?.trim() || "The House of Areni",
+    title: data.title?.trim() || "Zarder",
     description: toPlainText(data.description),
     imageUrl: data.image_url || undefined,
   };
@@ -437,7 +439,7 @@ export async function getBlogs(): Promise<BlogPost[]> {
   const data = unwrapData(await shopRequest<Resource<BackendBlog[]>>(`/blogs/${shopConfig.appId}`));
   return data.map((blog) => ({
     id: blog.id,
-    title: blog.title?.trim() || "Areni Journal",
+    title: blog.title?.trim() || "Zarder Journal",
     description: toPlainText(blog.description),
     imageUrl: blog.image_url || undefined,
     createdAt: blog.created_at || undefined,
@@ -467,6 +469,11 @@ export async function removeFromCart(cartId: number): Promise<void> {
   });
 }
 
+export async function replaceCartQuantity(cartId: number, productId: number, quantity: number): Promise<void> {
+  await removeFromCart(cartId);
+  if (quantity > 0) await addToCart(productId, quantity);
+}
+
 export async function likeProduct(productId: number): Promise<void> {
   await shopRequest<{ message: string }>("/product/like", {
     method: "POST",
@@ -490,6 +497,7 @@ export async function createOrder(
   items: OrderItem[],
   phoneNumber: string,
   additionalInfo: Record<string, unknown> = {},
+  buyerTin = "",
 ): Promise<OrderCreateResponse> {
   const productIds = items.map((item) => item.product.id);
   const productCounts = Object.fromEntries(items.map((item) => [String(item.product.id), item.quantity]));
@@ -513,6 +521,7 @@ export async function createOrder(
       product_counts: productCounts,
       product_info: productInfo,
       phone_number: phoneNumber,
+      ...(buyerTin ? { buyer_tin: buyerTin } : {}),
       additional_info: additionalInfo,
     },
   });
@@ -592,7 +601,7 @@ export function submitIdramPayment(payment: PaymentInitResponse): void {
 export function normalizeCatalog(
   categories: BackendCategory[],
   topProducts: BackendTopProduct[] = [],
-): { products: Product[]; collections: Collection[] } {
+): { products: Product[] } {
   const categoryById = buildCategoryMap(categories);
   const topProductIds = new Set(
     topProducts
@@ -603,6 +612,7 @@ export function normalizeCatalog(
 
   const collectProducts = (category: BackendCategory) => {
     category.products?.forEach((product) => {
+      if (product.status === "inactive" || product.status === "archived") return;
       productsById.set(
         product.id,
         mapBackendProduct(product, {
@@ -618,7 +628,6 @@ export function normalizeCatalog(
 
   return {
     products: Array.from(productsById.values()),
-    collections: categories.map((category) => mapCategoryToCollection(category)),
   };
 }
 
@@ -629,28 +638,45 @@ export function mapBackendProduct(
   const info = toRecord(product.info);
   const images = product.media_urls?.filter(Boolean) ?? [];
   const categoryName = options.category?.name || getInfoValue(info, ["category", "type"]);
-  const collectionName = getInfoValue(info, ["collection", "line", "series"]) || categoryName || "Areni";
+  const backendCollections = (product.collections ?? []).filter(
+    (collection): collection is { id: number; name?: string | null } => Number.isInteger(collection.id),
+  );
+  const collectionIds = Array.from(new Set([
+    ...backendCollections.map((collection) => `collection-${collection.id}`),
+    ...(Array.isArray(product.collection_ids)
+      ? product.collection_ids.filter((id): id is number => Number.isInteger(id)).map((id) => `collection-${id}`)
+      : []),
+  ]));
+  const collectionName = backendCollections[0]?.name?.trim() || getInfoValue(info, ["collection", "line", "series"]);
   const listPrice = toNumber(product.price);
   const salePrice = toNumber(product.new_price);
   const hasSale = salePrice > 0 && listPrice > 0 && salePrice < listPrice;
   const price = hasSale ? salePrice : listPrice || salePrice;
+  const status = product.status || "active";
+  const badges = normalizeBadges(product.badges);
 
   return {
     id: product.id,
     name: product.name,
-    subtitle: getInfoValue(info, ["subtitle", "tagline"]) || `${collectionName} Collection`,
+    subtitle: getInfoValue(info, ["subtitle", "tagline"]) || collectionName || categoryName || "",
     price,
     originalPrice: hasSale ? listPrice : undefined,
-    material: getInfoValue(info, ["material", "metal", "karat"]) || "Fine jewellery",
+    material: getInfoValue(info, ["material", "metal", "karat"]) || "—",
     gemstone: getInfoValue(info, ["gemstone", "stone", "gem"]),
-    collection: slugify(collectionName),
+    collection: collectionIds[0] || "",
+    collectionIds,
     category: slugify(categoryName || "jewellery"),
+    categoryId: product.category_id,
+    categoryLabel: categoryName || "",
     image: images[0] || DEFAULT_PRODUCT_IMAGE,
     images: images.length ? images : [DEFAULT_PRODUCT_IMAGE],
-    isNew: isRecent(product.created_at),
-    isBestSeller: options.topProductIds?.has(product.id) || false,
-    inStock: true,
-    description: product.description?.trim() || toPlainText(product.description_html) || "A hand-finished piece from the Areni atelier.",
+    isNew: badges.includes("new"),
+    isBestSeller: badges.includes("best_seller"),
+    isFeatured: options.topProductIds?.has(product.id) || false,
+    inStock: status === "active",
+    status,
+    badges,
+    description: product.description?.trim() || toPlainText(product.description_html),
     descriptionHtml: product.description_html || undefined,
     colors: normalizeOptions(product.colors),
     sizes: normalizeOptions(product.sizes),
@@ -668,34 +694,18 @@ function buildCategoryMap(categories: BackendCategory[]): Map<number, BackendCat
   return map;
 }
 
-function mapCategoryToCollection(category: BackendCategory): Collection {
-  const products = collectProductsForCategory(category);
-  const mappedProducts = products.map((product) => mapBackendProduct(product, { category }));
-  const image =
-    firstMediaUrl(category.media_url) ||
-    products.find((product) => product.media_urls?.length)?.media_urls?.[0] ||
-    DEFAULT_COLLECTION_IMAGE;
-
-  return {
-    id: slugify(category.name || `collection-${category.id}`),
-    backendId: category.id,
-    name: category.name,
-    tagline: `Explore ${category.name.toLowerCase()} pieces from the Areni atelier`,
-    count: products.length,
-    image,
-    price: 0,
-    products: mappedProducts,
-  };
-}
-
 function mapBackendCollection(collection: BackendCollection): Collection {
   const products = collection.products ?? [];
-  const collectionId = slugify(collection.name || `collection-${collection.id}`);
-  const mappedProducts = products.map((product) => ({
-    ...mapBackendProduct(product),
-    subtitle: `${collection.name} Collection`,
-    collection: collectionId,
-  }));
+  const collectionId = `collection-${collection.id}`;
+  const mappedProducts = products.map((product) => {
+    const mappedProduct = mapBackendProduct(product);
+    return {
+      ...mappedProduct,
+      subtitle: `${collection.name} Collection`,
+      collection: collectionId,
+      collectionIds: Array.from(new Set([collectionId, ...mappedProduct.collectionIds])),
+    };
+  });
   const image =
     firstMediaUrl(collection.media_url) ||
     products.find((product) => product.media_urls?.length)?.media_urls?.[0] ||
@@ -705,20 +715,12 @@ function mapBackendCollection(collection: BackendCollection): Collection {
     id: collectionId,
     backendId: collection.id,
     name: collection.name,
-    tagline: `Explore ${collection.name.toLowerCase()} pieces from the Areni atelier`,
+    tagline: collection.name,
     count: products.length,
     image,
     price: toNumber(collection.price),
     products: mappedProducts,
   };
-}
-
-function collectProductsForCategory(category: BackendCategory): BackendProduct[] {
-  const products = [...(category.products ?? [])];
-  category.subcategories?.forEach((subcategory) => {
-    products.push(...collectProductsForCategory(subcategory));
-  });
-  return products;
 }
 
 function firstMediaUrl(value: BackendCategory["media_url"]): string | undefined {
@@ -769,6 +771,11 @@ function normalizeOptions(options?: unknown[]): ProductOption[] {
     .filter((option): option is ProductOption => Boolean(option));
 }
 
+function normalizeBadges(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((badge): badge is string => typeof badge === "string" && badge.trim().length > 0);
+}
+
 function getOptionString(value: unknown): string | undefined {
   if (typeof value === "string" && value.trim()) return value.trim();
   if (typeof value === "number") return String(value);
@@ -790,19 +797,11 @@ function toNumber(value: number | string | null | undefined): number {
   return 0;
 }
 
-function isRecent(value?: string | null): boolean {
-  if (!value) return false;
-  const timestamp = Date.parse(value);
-  if (Number.isNaN(timestamp)) return false;
-
-  const daysSinceCreated = (Date.now() - timestamp) / 86_400_000;
-  return daysSinceCreated >= 0 && daysSinceCreated <= 60;
-}
-
 function slugify(value: string): string {
   return value
+    .normalize("NFKC")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "") || "jewellery";
 }
 

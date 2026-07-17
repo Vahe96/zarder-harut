@@ -32,6 +32,7 @@ jobs:
       - name: Build
         env:
           VITE_BASE_PATH: /zarder-harut/
+          VITE_API_BASE_URL: https://backend.min4max.net/api
           VITE_SHOP_APP_ID: 19
           VITE_PAYMENT_PROVIDER: idram
         run: npm run build

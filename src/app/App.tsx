@@ -35,10 +35,11 @@ const DRAKHT_ASSETS = {
   birdsLineWeb: `${PUBLIC_BASE}drakht/birds-line-web.png`,
   birdsLineMobile: `${PUBLIC_BASE}drakht/birds-line-mobile.png`,
 };
+const WISHLIST_STORAGE_KEY = "zarder.shop.wishlist";
 
 // ─── PRODUCTS DATA ─────────────────────────────────────────────────────────────
 
-const PRODUCTS: Product[] = [
+const PRODUCTS = [
   {
     id: 1, name: "Ararat Sovereign Ring", subtitle: "Armenian Heritage Collection",
     price: 1840, material: "18K Gold", gemstone: "Ruby",
@@ -148,10 +149,10 @@ const COLLECTIONS_DATA: Collection[] = [
 ];
 
 const DEFAULT_SHOP_INFO: ShopInfo = {
-  name: "Areni Armenian Jewels",
-  email: "hello@areni.am",
-  phone: "+374 10 52 84 00",
-  address: "14 Abovyan Street, Yerevan 0001, Republic of Armenia",
+  name: "Zarder",
+  email: "",
+  phone: "",
+  address: "",
 };
 
 const REVIEWS = [
@@ -284,9 +285,9 @@ function ProductCard({
               {product.name}
             </h3>
             <div className="flex items-center gap-2">
-              <span className="font-heading text-primary text-sm tracking-wide">${product.price.toLocaleString()}</span>
+              <span className="font-heading text-primary text-sm tracking-wide">{formatAmdPrice(product.price)}</span>
               {product.originalPrice && (
-                <span className="font-body text-muted-foreground text-xs line-through">${product.originalPrice.toLocaleString()}</span>
+                <span className="font-body text-muted-foreground text-xs line-through">{formatAmdPrice(product.originalPrice)}</span>
               )}
             </div>
           </div>
@@ -318,7 +319,7 @@ function ProductCard({
 // ─── CART DRAWER ──────────────────────────────────────────────────────────────
 
 function CartDrawer({
-  isOpen, onClose, items, onQuantityChange, total, onCheckout,
+  isOpen, onClose, items, onQuantityChange, total, onCheckout, message,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -326,6 +327,7 @@ function CartDrawer({
   onQuantityChange: (item: CartItem, delta: number) => void;
   total: number;
   onCheckout: () => void;
+  message: string;
 }) {
   return (
     <>
@@ -349,6 +351,12 @@ function CartDrawer({
             <X size={20} />
           </button>
         </div>
+
+        {message && (
+          <div className="border-b border-border bg-secondary/30 px-6 py-3">
+            <p className="font-body text-[11px] leading-relaxed text-muted-foreground">{message}</p>
+          </div>
+        )}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
@@ -579,6 +587,8 @@ function CollectionsPreview({
   collections: Collection[];
 }) {
   const featured = collections.slice(0, 4);
+  if (featured.length === 0) return null;
+
   return (
     <section className="px-6 md:px-12 py-20 md:py-28">
       {/* Section header */}
@@ -628,7 +638,7 @@ function CollectionsPreview({
 
 // ─── CATEGORY CAROUSEL ───────────────────────────────────────────────────────
 
-function CategoryCarousel({ onNavigate, products }: { onNavigate: (p: Page) => void; products: Product[] }) {
+function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (category: string) => void; products: Product[] }) {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const categories = useMemo(() => {
     const grouped = new Map<string, { id: string; name: string; count: number; image: string }>();
@@ -642,7 +652,7 @@ function CategoryCarousel({ onNavigate, products }: { onNavigate: (p: Page) => v
 
       grouped.set(product.category, {
         id: product.category,
-        name: titleCase(product.category),
+        name: product.categoryLabel || titleCase(product.category),
         count: 1,
         image: product.image,
       });
@@ -691,7 +701,7 @@ function CategoryCarousel({ onNavigate, products }: { onNavigate: (p: Page) => v
           {categories.map((category) => (
             <button
               key={category.id}
-              onClick={() => onNavigate("shop")}
+              onClick={() => onViewCategory(category.id)}
               className="group relative h-[360px] min-w-[78vw] snap-start overflow-hidden text-left sm:min-w-[360px] md:min-w-[420px]"
             >
               <img src={category.image} alt={category.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -1161,9 +1171,10 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 
 function HomePage({
-  onNavigate, onAddToCart, onToggleWishlist, onViewProduct, onViewCollection, wishlist, products, collections, isLoading, catalogMessage,
+  onNavigate, onViewCategory, onAddToCart, onToggleWishlist, onViewProduct, onViewCollection, wishlist, products, collections, isLoading, catalogMessage, onRetry,
 }: {
   onNavigate: (p: Page) => void;
+  onViewCategory: (category: string) => void;
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
   onViewProduct: (id: number) => void;
@@ -1173,8 +1184,9 @@ function HomePage({
   collections: Collection[];
   isLoading: boolean;
   catalogMessage: string;
+  onRetry: () => void;
 }) {
-  const bestSellers = products.filter((p) => p.isBestSeller).slice(0, 4);
+  const bestSellers = products.filter((p) => p.isFeatured || p.isBestSeller).slice(0, 4);
   const bestSellerShelf = (bestSellers.length ? bestSellers : products.slice(4)).slice(0, 4);
 
   return (
@@ -1189,9 +1201,14 @@ function HomePage({
       {catalogMessage && !isLoading && (
         <div className="px-6 md:px-12 py-4 border-y border-border bg-secondary/20 text-center">
           <p className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground">{catalogMessage}</p>
+          {products.length === 0 && (
+            <button type="button" onClick={onRetry} className="mt-2 font-heading text-[10px] uppercase tracking-[0.2em] text-primary underline underline-offset-4">
+              Փորձել կրկին
+            </button>
+          )}
         </div>
       )}
-      <CategoryCarousel onNavigate={onNavigate} products={products} />
+      <CategoryCarousel onViewCategory={onViewCategory} products={products} />
       <HeritageBanner onNavigate={onNavigate} />
       <ProductsGrid
         title="Սիրված զարդեր"
@@ -1214,7 +1231,7 @@ function HomePage({
 // ─── SHOP PAGE ────────────────────────────────────────────────────────────────
 
 function ShopPage({
-  onAddToCart, onToggleWishlist, onViewProduct, wishlist, products, collections,
+  onAddToCart, onToggleWishlist, onViewProduct, wishlist, products, collections, isLoading, catalogMessage, onRetry, initialCategory,
 }: {
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
@@ -1222,74 +1239,38 @@ function ShopPage({
   wishlist: number[];
   products: Product[];
   collections: Collection[];
+  isLoading: boolean;
+  catalogMessage: string;
+  onRetry: () => void;
+  initialCategory: string;
 }) {
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({ category: "all", collection: "all", inStock: false });
+  const [filters, setFilters] = useState({ category: initialCategory || "all", collection: "all", inStock: false });
   const [sort, setSort] = useState("newest");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [remoteSearch, setRemoteSearch] = useState<Product[] | null>(null);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchError, setSearchError] = useState("");
 
   const categoryOptions = useMemo(() => {
-    const categories = Array.from(new Set(products.map((product) => product.category))).filter(Boolean);
-    return [["all", "Բոլոր զարդերը"], ...categories.map((category) => [category, titleCase(category)])] as [string, string][];
+    const categories = new Map<string, string>();
+    products.forEach((product) => categories.set(product.category, product.categoryLabel || titleCase(product.category)));
+    return [["all", "Բոլոր զարդերը"], ...Array.from(categories.entries())] as [string, string][];
   }, [products]);
 
   const collectionOptions = useMemo(() => {
-    const labels = new Map<string, string>();
-    collections.forEach((collection) => labels.set(collection.id, collection.name));
-    products.forEach((product) => {
-      if (!labels.has(product.collection)) labels.set(product.collection, titleCase(product.collection));
-    });
-
-    return [["all", "Բոլոր հավաքածուները"], ...Array.from(labels.entries())] as [string, string][];
-  }, [collections, products]);
-
-  useEffect(() => {
-    const trimmed = search.trim();
-    setSearchError("");
-
-    if (trimmed.length < 2) {
-      setRemoteSearch(null);
-      setSearchLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    const timer = window.setTimeout(async () => {
-      setSearchLoading(true);
-      try {
-        const results = await shopApi.searchProducts(trimmed);
-        if (!cancelled) setRemoteSearch(results);
-      } catch {
-        if (!cancelled) {
-          setRemoteSearch(null);
-          setSearchError("Որոնումն օգտագործում է բեռնված զարդերի ցանկը։");
-        }
-      } finally {
-        if (!cancelled) setSearchLoading(false);
-      }
-    }, 300);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-    };
-  }, [search]);
+    return [["all", "Բոլոր հավաքածուները"], ...collections.map((collection) => [collection.id, collection.name])] as [string, string][];
+  }, [collections]);
 
   const filtered = useMemo(() => {
-    let result = [...(remoteSearch ?? products)];
-    if (search && remoteSearch === null) result = result.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()));
+    let result = [...products];
+    if (search) result = result.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()));
     if (filters.category !== "all") result = result.filter((p) => p.category === filters.category);
-    if (filters.collection !== "all") result = result.filter((p) => p.collection === filters.collection);
+    if (filters.collection !== "all") result = result.filter((p) => p.collectionIds.includes(filters.collection));
     if (filters.inStock) result = result.filter((p) => p.inStock);
     if (sort === "price-asc") result.sort((a, b) => a.price - b.price);
     else if (sort === "price-desc") result.sort((a, b) => b.price - a.price);
     else if (sort === "newest") result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
     else if (sort === "bestseller") result.sort((a, b) => (b.isBestSeller ? 1 : 0) - (a.isBestSeller ? 1 : 0));
     return result;
-  }, [products, remoteSearch, search, filters, sort]);
+  }, [products, search, filters, sort]);
 
   const FilterPanel = () => (
     <div className="space-y-8">
@@ -1401,13 +1382,18 @@ function ShopPage({
             </div>
 
             <p className="font-body text-[10px] text-muted-foreground tracking-wider ml-auto">
-              {searchLoading ? "Որոնում..." : `${filtered.length} զարդ`}
+              {isLoading ? "Բեռնվում է..." : `${filtered.length} զարդ`}
             </p>
           </div>
 
-          {searchError && (
+          {catalogMessage && (
             <div className="mb-6 border border-border bg-secondary/30 px-4 py-3">
-              <p className="font-body text-[11px] text-muted-foreground">{searchError}</p>
+              <p className="font-body text-[11px] text-muted-foreground">{catalogMessage}</p>
+              {!isLoading && products.length === 0 && (
+                <button type="button" onClick={onRetry} className="mt-2 font-heading text-[10px] uppercase tracking-[0.2em] text-primary underline underline-offset-4">
+                  Փորձել կրկին
+                </button>
+              )}
             </div>
           )}
 
@@ -1486,10 +1472,17 @@ function ProductDetailPage({
     shopApi.getProduct(productId)
       .then((freshProduct) => {
         if (cancelled) return;
-        const images = freshProduct.images?.length ? freshProduct.images : [freshProduct.image];
-        setProduct(freshProduct);
+        const mergedProduct = initialProduct ? {
+          ...freshProduct,
+          category: initialProduct.category,
+          categoryId: initialProduct.categoryId,
+          categoryLabel: initialProduct.categoryLabel,
+          isFeatured: initialProduct.isFeatured,
+        } : freshProduct;
+        const images = mergedProduct.images?.length ? mergedProduct.images : [mergedProduct.image];
+        setProduct(mergedProduct);
         setActiveImage(images[0]);
-        setSelectedSize(freshProduct.sizes?.[0]?.name ?? "");
+        setSelectedSize(mergedProduct.sizes?.[0]?.name ?? "");
       })
       .catch(() => {
         if (cancelled) return;
@@ -1533,7 +1526,7 @@ function ProductDetailPage({
     .slice(0, 12);
   const productCollections = collections.filter((collection) => {
     const hasProduct = collection.products?.some((item) => item.id === product.id);
-    return hasProduct || collection.id === product.collection || collection.id === initialProduct?.collection;
+    return hasProduct || product.collectionIds.includes(collection.id);
   });
   const isWishlisted = wishlist.includes(product.id);
 
@@ -1592,22 +1585,20 @@ function ProductDetailPage({
           <p className="font-body text-sm text-muted-foreground mb-6">{product.material}{product.gemstone ? ` · ${product.gemstone}` : ""}</p>
 
           <div className="flex items-center gap-3 mb-7">
-            <span className="font-heading text-2xl text-primary tracking-wide">${product.price.toLocaleString()}</span>
-            {product.originalPrice && <span className="font-body text-muted-foreground text-sm line-through">${product.originalPrice.toLocaleString()}</span>}
+            <span className="font-heading text-2xl text-primary tracking-wide">{formatAmdPrice(product.price)}</span>
+            {product.originalPrice && <span className="font-body text-muted-foreground text-sm line-through">{formatAmdPrice(product.originalPrice)}</span>}
           </div>
 
           <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-8 font-light">{product.description}</p>
 
-          <div className="mb-7 border border-border bg-black/20 p-4">
-            <p className="mb-2 font-heading text-[10px] uppercase tracking-[0.25em] text-foreground">Հավաքածու</p>
-            <p className="mb-4 font-body text-xs leading-relaxed text-muted-foreground">
-              Այս զարդը ներառված է ստորև նշված հավաքածուում։ Սեղմեք անունը՝ նույն ոճի ամբողջ հավաքածուն տեսնելու համար։
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {(productCollections.length ? productCollections : [{
-                id: initialProduct?.collection || product.collection,
-                name: product.subtitle || titleCase(initialProduct?.collection || product.collection),
-              } as Collection]).map((collection) => (
+          {productCollections.length > 0 && (
+            <div className="mb-7 border border-border bg-black/20 p-4">
+              <p className="mb-2 font-heading text-[10px] uppercase tracking-[0.25em] text-foreground">Հավաքածու</p>
+              <p className="mb-4 font-body text-xs leading-relaxed text-muted-foreground">
+                Այս զարդը ներառված է ստորև նշված հավաքածուում։ Սեղմեք անունը՝ ամբողջ հավաքածուն տեսնելու համար։
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {productCollections.map((collection) => (
                 <button
                   key={collection.id}
                   type="button"
@@ -1618,8 +1609,9 @@ function ProductDetailPage({
                   <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
                 </button>
               ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {product.sizes && product.sizes.length > 0 && (
             <div className="mb-7">
@@ -1730,15 +1722,16 @@ function CollectionDetailPage({
   wishlist: number[];
 }) {
   const collectionProducts = useMemo(() => {
-    const ownProducts = collection.products?.length
-      ? collection.products
-      : products.filter((product) => product.collection === collection.id);
+    const ownProducts = collection.products ?? [];
     const knownById = new Map(products.map((product) => [product.id, product]));
 
     return ownProducts.map((product) => knownById.get(product.id) ?? product);
   }, [collection, products]);
 
   const productsTotal = collectionProducts.reduce((sum, product) => sum + product.price, 0);
+  const collectionAvailable = collection.price > 0
+    && collectionProducts.length > 0
+    && collectionProducts.every((product) => product.inStock);
 
   return (
     <div className="pt-24 min-h-screen">
@@ -1779,10 +1772,10 @@ function CollectionDetailPage({
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => onAddCollectionToCart(collection, collectionProducts)}
-              disabled={collectionProducts.length === 0}
+              disabled={!collectionAvailable}
               className="flex-1 py-4 bg-primary text-primary-foreground font-heading text-xs tracking-[0.22em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Գնել ամբողջ հավաքածուն
+              {collectionAvailable ? "Գնել ամբողջ հավաքածուն" : "Հավաքածուն հասանելի չէ"}
             </button>
             <a
               href="#collection-products"
@@ -1828,10 +1821,16 @@ function CollectionsPage({
   onNavigate,
   onViewCollection,
   collections,
+  isLoading,
+  message,
+  onRetry,
 }: {
   onNavigate: (p: Page) => void;
   onViewCollection: (id: string) => void;
   collections: Collection[];
+  isLoading: boolean;
+  message: string;
+  onRetry: () => void;
 }) {
   return (
     <div className="pt-24 min-h-screen">
@@ -1845,8 +1844,20 @@ function CollectionsPage({
       </div>
 
       <div className="px-6 md:px-12 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {collections.map((col) => (
+        {isLoading ? (
+          <div className="border border-border bg-secondary/20 px-6 py-16 text-center">
+            <p className="font-heading text-sm tracking-wider text-muted-foreground">Հավաքածուները բեռնվում են։</p>
+          </div>
+        ) : collections.length === 0 ? (
+          <div className="border border-border bg-secondary/20 px-6 py-16 text-center">
+            <p className="font-heading text-sm tracking-wider text-muted-foreground">{message || "Այս խանութի համար հավաքածուներ դեռ չեն հրապարակվել։"}</p>
+            <button type="button" onClick={onRetry} className="mt-4 font-heading text-[10px] uppercase tracking-[0.2em] text-primary underline underline-offset-4">
+              Թարմացնել
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {collections.map((col) => (
             <button
               key={col.id}
               onClick={() => onViewCollection(col.id)}
@@ -1872,8 +1883,9 @@ function CollectionsPage({
                 </div>
               </div>
             </button>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Custom CTA */}
         <div className="mt-16 p-10 border border-border text-center relative">
@@ -2515,7 +2527,7 @@ function AccountModal({
                         <p className="font-heading text-xs tracking-wide text-foreground">{order.product.name}</p>
                         <p className="font-body text-[10px] text-muted-foreground mt-1">Qty {order.productCount} · {orderStatusLabel(order.status)}</p>
                       </div>
-                      <p className="font-heading text-sm text-primary">${(order.product.price * order.productCount).toLocaleString()}</p>
+                      <p className="font-heading text-sm text-primary">{formatAmdPrice(order.product.price * order.productCount)}</p>
                     </div>
                   ))}
                 </div>
@@ -2543,9 +2555,10 @@ function CheckoutModal({
   user: UserProfile | null;
   onClose: () => void;
   onNeedAuth: () => void;
-  onComplete: () => void;
+  onComplete: () => Promise<void>;
 }) {
   const [phone, setPhone] = useState("");
+  const [buyerTin, setBuyerTin] = useState("");
   const [comment, setComment] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "blocked" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -2554,6 +2567,7 @@ function CheckoutModal({
   useEffect(() => {
     if (!isOpen) return;
     setPhone(user?.phone ?? "");
+    setBuyerTin("");
     setComment("");
     setStatus("idle");
     setMessage("");
@@ -2581,6 +2595,13 @@ function CheckoutModal({
       return;
     }
 
+    const normalizedTin = buyerTin.trim();
+    if (normalizedTin && !/^\d{8}$/.test(normalizedTin)) {
+      setStatus("error");
+      setMessage("ՀՎՀՀ-ն պետք է պարունակի ճիշտ 8 թվանշան։");
+      return;
+    }
+
     setStatus("submitting");
     setMessage("");
     setSummaryItems(items);
@@ -2596,7 +2617,7 @@ function CheckoutModal({
 
       const additionalInfo = comment.trim() ? { comment: comment.trim() } : {};
       const orderResponses = await Promise.all(
-        orderGroups.map((orderItems) => shopApi.createOrder(orderItems, phone, additionalInfo)),
+        orderGroups.map((orderItems) => shopApi.createOrder(orderItems, phone, additionalInfo, normalizedTin)),
       );
       const orderIds = orderResponses.flatMap((response) => response.order_ids);
 
@@ -2609,14 +2630,14 @@ function CheckoutModal({
         ? await shopApi.initAmeriabankPayment(orderIds, description)
         : await shopApi.initIdramPayment(orderIds, description);
 
-      onComplete();
-
       if (payment.payment_url) {
+        await onComplete();
         window.location.assign(payment.payment_url);
         return;
       }
 
       if (payment.form_action) {
+        await onComplete();
         shopApi.submitIdramPayment(payment);
         return;
       }
@@ -2648,6 +2669,11 @@ function CheckoutModal({
             <div>
               <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Կոնտակտային հեռախոս</label>
               <input required value={phone} onChange={(event) => setPhone(event.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
+            </div>
+
+            <div>
+              <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">ՀՎՀՀ (ըստ ցանկության)</label>
+              <input inputMode="numeric" pattern="[0-9]{8}" maxLength={8} value={buyerTin} onChange={(event) => setBuyerTin(event.target.value.replace(/\D/g, ""))} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
             </div>
 
             <div>
@@ -2748,14 +2774,19 @@ function cartLineToItem(line: CartLine, productById: Map<number, Product>): Cart
     product: knownProduct ?? {
       id: line.product.id,
       name: line.product.name,
-      subtitle: "Areni Collection",
+      subtitle: "",
       price: line.product.price,
-      material: "Fine jewellery",
-      collection: "areni",
+      material: "—",
+      collection: "",
+      collectionIds: [],
       category: "jewellery",
-      image: "https://images.unsplash.com/photo-1626784214536-d859187e0bd0?w=600&h=720&fit=crop&auto=format",
+      categoryId: 0,
+      categoryLabel: "",
+      image: DRAKHT_ASSETS.logoWeb,
       inStock: true,
-      description: "A hand-finished piece from the Areni atelier.",
+      status: "active",
+      badges: [],
+      description: "",
     },
   };
 }
@@ -2775,7 +2806,8 @@ function cartItemTotal(item: CartItem): number {
 }
 
 function collectionCartProduct(collection: Collection): Product {
-  const backendId = collection.backendId ?? Math.abs(hashString(collection.id));
+  const backendId = collection.backendId;
+  if (!backendId) throw new Error("Collection is missing its backend ID.");
 
   return {
     id: -backendId,
@@ -2784,10 +2816,15 @@ function collectionCartProduct(collection: Collection): Product {
     price: collection.price,
     material: "Collection package",
     collection: collection.id,
+    collectionIds: [collection.id],
     category: "collection",
+    categoryId: 0,
+    categoryLabel: "Հավաքածու",
     image: collection.image,
     images: [collection.image],
     inStock: true,
+    status: "active",
+    badges: [],
     description: collection.tagline,
   };
 }
@@ -2815,7 +2852,14 @@ function buildCheckoutOrderGroups(items: CartItem[]): shopApi.OrderItem[][] {
     const packageProducts = item.products?.length ? item.products : item.collection.products ?? [];
     const collectionId = item.collection.backendId;
 
-    if (!collectionId || packageProducts.length === 0) return;
+    if (
+      !collectionId
+      || packageProducts.length === 0
+      || packageProducts.some((product) => !product.inStock)
+      || new Set(packageProducts.map((product) => product.id)).size !== packageProducts.length
+    ) {
+      throw new Error(`«${item.collection.name}» հավաքածուի տվյալները ամբողջական կամ հասանելի չեն։`);
+    }
 
     collectionGroups.push(
       packageProducts.map((product) => ({
@@ -2835,10 +2879,6 @@ function buildCheckoutOrderGroups(items: CartItem[]): shopApi.OrderItem[][] {
   return groups;
 }
 
-function hashString(value: string): number {
-  return value.split("").reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
-}
-
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -2848,8 +2888,9 @@ export default function App() {
     return saved === "light" || saved === "dark" ? saved : "dark";
   });
   const [page, setPage] = useState<Page>("home");
-  const [products, setProducts] = useState<Product[]>(PRODUCTS);
-  const [collections, setCollections] = useState<Collection[]>(COLLECTIONS_DATA);
+  const [shopCategory, setShopCategory] = useState("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [shopInfo, setShopInfo] = useState<ShopInfo>(DEFAULT_SHOP_INFO);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
@@ -2857,8 +2898,19 @@ export default function App() {
   const [productReturnCollectionId, setProductReturnCollectionId] = useState<string | null>(null);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogMessage, setCatalogMessage] = useState("");
+  const [collectionsMessage, setCollectionsMessage] = useState("");
+  const [catalogReloadKey, setCatalogReloadKey] = useState(0);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [wishlist, setWishlist] = useState<number[]>([]);
+  const [wishlist, setWishlist] = useState<number[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const value = JSON.parse(window.localStorage.getItem(WISHLIST_STORAGE_KEY) ?? "[]");
+      return Array.isArray(value) ? value.filter((id): id is number => Number.isInteger(id)) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [cartMessage, setCartMessage] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -2886,6 +2938,7 @@ export default function App() {
     const loadShopData = async () => {
       setCatalogLoading(true);
       setCatalogMessage("");
+      setCollectionsMessage("");
 
       const [shopInfoResult, categoryResult, topProductResult, aboutResult, collectionResult] = await Promise.allSettled([
         shopApi.getAppInfo(),
@@ -2903,23 +2956,21 @@ export default function App() {
       if (categoryResult.status === "fulfilled") {
         const topProducts = topProductResult.status === "fulfilled" ? topProductResult.value : [];
         const normalized = shopApi.normalizeCatalog(categoryResult.value, topProducts);
+        setProducts(normalized.products);
+        if (normalized.products.length === 0) setCatalogMessage("Այս խանութի ապրանքացանկը դեռ դատարկ է։");
+      } else {
+        setProducts([]);
+        setCatalogMessage("Չհաջողվեց բեռնել ապրանքացանկը։ Ստուգեք կապը և փորձեք կրկին։");
+      }
 
-        if (normalized.products.length > 0) {
-          setProducts(normalized.products);
-        } else {
-          setCatalogMessage("Showing curated collection while the live catalog is empty.");
-        }
-
-        if (collectionResult.status === "fulfilled" && collectionResult.value.length > 0) {
-          setCollections(collectionResult.value);
-        } else if (normalized.collections.length > 0) {
-          setCollections(normalized.collections);
+      if (collectionResult.status === "fulfilled") {
+        setCollections(collectionResult.value);
+        if (collectionResult.value.length === 0) {
+          setCollectionsMessage("Այս խանութի համար հավաքածուներ դեռ չեն հրապարակվել։");
         }
       } else {
-        setCatalogMessage("Showing curated collection while the live catalog is unavailable.");
-        if (collectionResult.status === "fulfilled" && collectionResult.value.length > 0) {
-          setCollections(collectionResult.value);
-        }
+        setCollections([]);
+        setCollectionsMessage("Չհաջողվեց բեռնել հավաքածուները։");
       }
 
       setCatalogLoading(false);
@@ -2930,7 +2981,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [catalogReloadKey]);
 
   useEffect(() => {
     if (!shopApi.hasAuthTokens()) return;
@@ -2983,6 +3034,10 @@ export default function App() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+  }, [wishlist]);
+
   // Lock body scroll when cart is open
   useEffect(() => {
     document.body.style.overflow = cartOpen ? "hidden" : "";
@@ -3005,7 +3060,15 @@ export default function App() {
     if (p !== "product") setSelectedProductId(null);
     if (p !== "collection") setSelectedCollectionId(null);
     if (p !== "product") setProductReturnCollectionId(null);
+    if (p === "shop") setShopCategory("all");
     setPage(p);
+    setMobileOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const viewCategory = (category: string) => {
+    setShopCategory(category);
+    setPage("shop");
     setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -3035,6 +3098,28 @@ export default function App() {
       ...lines.map((line) => cartLineToItem(line, productById)),
       ...prev.filter((item) => item.kind === "collection"),
     ]);
+    setCartMessage("");
+  };
+
+  const syncCartAfterAuthentication = async () => {
+    if (!shopApi.hasAuthTokens()) return;
+
+    try {
+      const localProducts = cart.filter((item) => item.kind !== "collection" && !item.cartId);
+      const remoteLines = await shopApi.getCart();
+      const remoteQuantity = new Map(remoteLines.map((line) => [line.product.id, line.quantity]));
+
+      await Promise.all(
+        localProducts.map((item) => {
+          const missingQuantity = Math.max(0, item.quantity - (remoteQuantity.get(item.product.id) ?? 0));
+          return missingQuantity > 0 ? shopApi.addToCart(item.product.id, missingQuantity) : Promise.resolve();
+        }),
+      );
+      await refreshRemoteCart();
+    } catch (error) {
+      if (error instanceof shopApi.ApiError && error.status === 401) shopApi.clearTokens();
+      setCartMessage("Չհաջողվեց համաժամացնել զամբյուղը։ Փորձեք կրկին։");
+    }
   };
 
   const openAuth = (mode: AuthMode = "login", message = "") => {
@@ -3083,13 +3168,16 @@ export default function App() {
     }
   };
 
-  const completeOrder = () => {
+  const completeOrder = async () => {
     const cartIds = cart
       .map((item) => item.cartId)
       .filter((cartId): cartId is number => typeof cartId === "number");
 
     if (shopApi.hasAuthTokens()) {
-      void Promise.allSettled(cartIds.map((cartId) => shopApi.removeFromCart(cartId)));
+      const results = await Promise.allSettled(cartIds.map((cartId) => shopApi.removeFromCart(cartId)));
+      if (results.some((result) => result.status === "rejected")) {
+        setCartMessage("Պատվերը ստեղծվել է, բայց զամբյուղի մի մասը չհաջողվեց մաքրել։");
+      }
     }
 
     setCart([]);
@@ -3109,10 +3197,18 @@ export default function App() {
       await refreshRemoteCart();
     } catch (error) {
       if (error instanceof shopApi.ApiError && error.status === 401) shopApi.clearTokens();
+      setCartMessage("Չհաջողվեց թարմացնել զամբյուղը։");
+      await refreshRemoteCart().catch(() => undefined);
     }
   };
 
   const addCollectionToCart = (collection: Collection, packageProducts: Product[]) => {
+    if (!collection.backendId || collection.price <= 0 || packageProducts.length === 0 || packageProducts.some((product) => !product.inStock)) {
+      setCartMessage("Այս հավաքածուն հիմա հնարավոր չէ ավելացնել զամբյուղ։");
+      setCartOpen(true);
+      return;
+    }
+
     setCart((prev) => {
       const existing = prev.find((item) => item.kind === "collection" && item.collection?.id === collection.id);
       if (existing) {
@@ -3137,7 +3233,7 @@ export default function App() {
     setCartOpen(true);
   };
 
-  const changeCartQuantity = (item: CartItem, delta: number) => {
+  const changeCartQuantity = async (item: CartItem, delta: number) => {
     if (item.kind === "collection") {
       setCart((prev) =>
         prev
@@ -3148,21 +3244,25 @@ export default function App() {
     }
 
     if (delta > 0) {
-      void addToCart(item.product);
-      return;
+      setCart((prev) => prev.map((cartItem) => cartItemKey(cartItem) === cartItemKey(item) ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem));
+    } else {
+      setCart((prev) => prev
+        .map((cartItem) => cartItemKey(cartItem) === cartItemKey(item) ? { ...cartItem, quantity: cartItem.quantity - 1 } : cartItem)
+        .filter((cartItem) => cartItem.quantity > 0));
     }
 
-    const shouldRemove = item.quantity <= 1;
-    setCart((prev) =>
-      prev
-        .map((cartItem) => cartItem.kind !== "collection" && cartItem.product.id === item.product.id ? { ...cartItem, quantity: cartItem.quantity + delta } : cartItem)
-        .filter((cartItem) => cartItem.quantity > 0),
-    );
+    if (!shopApi.hasAuthTokens()) return;
 
-    if (shouldRemove && item.cartId && shopApi.hasAuthTokens()) {
-      shopApi.removeFromCart(item.cartId).catch((error) => {
-        if (error instanceof shopApi.ApiError && error.status === 401) shopApi.clearTokens();
-      });
+    const nextQuantity = Math.max(0, item.quantity + delta);
+    try {
+      if (delta > 0) await shopApi.addToCart(item.product.id, 1);
+      else if (item.cartId) await shopApi.replaceCartQuantity(item.cartId, item.product.id, nextQuantity);
+      else if (nextQuantity > 0) await shopApi.addToCart(item.product.id, nextQuantity);
+      await refreshRemoteCart();
+    } catch (error) {
+      if (error instanceof shopApi.ApiError && error.status === 401) shopApi.clearTokens();
+      setCartMessage("Քանակը չհաջողվեց համաժամացնել backend-ի հետ։");
+      await refreshRemoteCart().catch(() => undefined);
     }
   };
 
@@ -3210,6 +3310,7 @@ export default function App() {
         onQuantityChange={changeCartQuantity}
         total={cartTotal}
         onCheckout={startCheckout}
+        message={cartMessage}
       />
 
       <AuthModal
@@ -3221,7 +3322,7 @@ export default function App() {
         onAuthenticated={(user) => {
           setCurrentUser(user);
           setAuthMessage("");
-          void refreshRemoteCart();
+          void syncCartAfterAuthentication();
         }}
       />
 
@@ -3247,6 +3348,7 @@ export default function App() {
         {page === "home" && (
           <HomePage
             onNavigate={navigate}
+            onViewCategory={viewCategory}
             onAddToCart={addToCart}
             onToggleWishlist={toggleWishlist}
             onViewProduct={viewProduct}
@@ -3256,6 +3358,7 @@ export default function App() {
             collections={collections}
             isLoading={catalogLoading}
             catalogMessage={catalogMessage}
+            onRetry={() => setCatalogReloadKey((value) => value + 1)}
           />
         )}
         {page === "shop" && (
@@ -3266,6 +3369,10 @@ export default function App() {
             wishlist={wishlist}
             products={products}
             collections={collections}
+            isLoading={catalogLoading}
+            catalogMessage={catalogMessage}
+            onRetry={() => setCatalogReloadKey((value) => value + 1)}
+            initialCategory={shopCategory}
           />
         )}
         {page === "product" && selectedProductId && (
@@ -3281,7 +3388,16 @@ export default function App() {
             wishlist={wishlist}
           />
         )}
-        {page === "collections" && <CollectionsPage onNavigate={navigate} onViewCollection={viewCollection} collections={collections} />}
+        {page === "collections" && (
+          <CollectionsPage
+            onNavigate={navigate}
+            onViewCollection={viewCollection}
+            collections={collections}
+            isLoading={catalogLoading}
+            message={collectionsMessage}
+            onRetry={() => setCatalogReloadKey((value) => value + 1)}
+          />
+        )}
         {page === "collection" && selectedCollection && (
           <CollectionDetailPage
             collection={selectedCollection}
