@@ -586,7 +586,7 @@ function CollectionsPreview({
   onViewCollection: (id: string) => void;
   collections: Collection[];
 }) {
-  const featured = collections.slice(0, 4);
+  const featured = collections.slice(0, 5);
   if (featured.length === 0) return null;
 
   return (
