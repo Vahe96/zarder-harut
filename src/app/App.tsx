@@ -17,6 +17,71 @@ type Page = "home" | "shop" | "collections" | "collection" | "product" | "about"
 type AuthMode = "login" | "register";
 type ThemeMode = "dark" | "light";
 
+interface RouteState {
+  page: Page;
+  productId: number | null;
+  collectionId: string | null;
+  category: string;
+  returnCollectionId: string | null;
+}
+
+const pageHref = (page: Page) => page === "home" ? "#/" : `#/${page}`;
+const productHref = (id: number, returnCollectionId?: string) => {
+  const query = returnCollectionId ? `?from=${encodeURIComponent(returnCollectionId)}` : "";
+  return `#/product/${id}${query}`;
+};
+const collectionHref = (id: string) => `#/collection/${encodeURIComponent(id)}`;
+const categoryHref = (category: string) => `#/shop?category=${encodeURIComponent(category)}`;
+
+function decodeRouteSegment(value: string | undefined) {
+  if (!value) return "";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return "";
+  }
+}
+
+function parseHashRoute(hash: string): RouteState {
+  const rawRoute = hash.replace(/^#/, "") || "/";
+  const [rawPath, rawQuery = ""] = rawRoute.split("?", 2);
+  const segments = rawPath.split("/").filter(Boolean).map(decodeRouteSegment);
+  const query = new URLSearchParams(rawQuery);
+  const fallback: RouteState = {
+    page: "home",
+    productId: null,
+    collectionId: null,
+    category: "all",
+    returnCollectionId: null,
+  };
+
+  if (segments.length === 0 || segments[0] === "home") return fallback;
+  if (segments[0] === "shop") {
+    return { ...fallback, page: "shop", category: query.get("category") || "all" };
+  }
+  if (segments[0] === "collections") return { ...fallback, page: "collections" };
+  if (segments[0] === "collection") {
+    const collectionId = segments[1] || null;
+    return collectionId ? { ...fallback, page: "collection", collectionId } : { ...fallback, page: "collections" };
+  }
+  if (segments[0] === "product") {
+    const productId = Number(segments[1]);
+    return Number.isInteger(productId) && productId > 0
+      ? { ...fallback, page: "product", productId, returnCollectionId: query.get("from") }
+      : { ...fallback, page: "shop" };
+  }
+  if (["about", "custom", "contact"].includes(segments[0])) {
+    return { ...fallback, page: segments[0] as Page };
+  }
+  return fallback;
+}
+
+function handleInternalLink(event: MouseEvent<HTMLAnchorElement>, onNavigate: () => void) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  onNavigate();
+}
+
 interface CartItem {
   product: Product;
   quantity: number;
@@ -224,12 +289,14 @@ function ProductCard({
   onToggleWishlist,
   onViewProduct,
   isWishlisted,
+  returnCollectionId,
 }: {
   product: Product;
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
   onViewProduct: (id: number) => void;
   isWishlisted: boolean;
+  returnCollectionId?: string;
 }) {
   const [added, setAdded] = useState(false);
 
@@ -247,43 +314,48 @@ function ProductCard({
   };
 
   return (
-    <div
-      className="group relative flex cursor-pointer flex-col"
-      onClick={() => onViewProduct(product.id)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") onViewProduct(product.id);
-      }}
-    >
+    <div className="group relative flex flex-col">
       {/* Image container */}
-      <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-        />
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {product.isNew && (
-            <span className="bg-primary text-primary-foreground font-heading text-[10px] tracking-[0.2em] uppercase px-2.5 py-1">Նոր</span>
-          )}
-          {product.isBestSeller && (
-            <span className="bg-foreground/90 text-background font-heading text-[10px] tracking-[0.2em] uppercase px-2.5 py-1">Սիրված</span>
-          )}
-          {!product.inStock && (
-            <span className="bg-muted text-muted-foreground font-heading text-[10px] tracking-[0.2em] uppercase px-2.5 py-1">Առկա չէ</span>
-          )}
+      <a
+        href={productHref(product.id, returnCollectionId)}
+        onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
+        className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        aria-label={`Դիտել ${product.name}`}
+      >
+        <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+          />
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            {product.isNew && (
+              <span className="bg-primary text-primary-foreground font-heading text-[10px] tracking-[0.2em] uppercase px-2.5 py-1">Նոր</span>
+            )}
+            {product.isBestSeller && (
+              <span className="bg-foreground/90 text-background font-heading text-[10px] tracking-[0.2em] uppercase px-2.5 py-1">Սիրված</span>
+            )}
+            {!product.inStock && (
+              <span className="bg-muted text-muted-foreground font-heading text-[10px] tracking-[0.2em] uppercase px-2.5 py-1">Առկա չէ</span>
+            )}
+          </div>
         </div>
-      </div>
+      </a>
       {/* Info */}
       <div className="pt-4 pb-2">
         <p className="font-body text-[10px] tracking-[0.18em] text-muted-foreground uppercase mb-1">{product.subtitle}</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="w-full min-w-0 sm:w-auto">
-            <h3 className="font-heading text-sm tracking-wide text-foreground leading-snug mb-2 transition-colors group-hover:text-primary">
-              {product.name}
-            </h3>
+            <a
+              href={productHref(product.id, returnCollectionId)}
+              onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
+              className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <h3 className="font-heading text-sm tracking-wide text-foreground leading-snug mb-2 transition-colors group-hover:text-primary">
+                {product.name}
+              </h3>
+            </a>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="font-heading text-primary text-sm tracking-wide">{formatAmdPrice(product.price)}</span>
               {product.originalPrice && (
@@ -448,7 +520,12 @@ function Nav({
     <header className={`fixed top-0 left-0 right-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm transition-all duration-400 ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.18)]" : ""}`}>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 lg:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] lg:px-8 lg:py-3 xl:px-12">
         {/* Logo */}
-        <button onClick={() => onNavigate("home")} className="group flex min-w-0 items-center justify-start overflow-hidden" aria-label="Դրախտ գլխավոր էջ">
+        <a
+          href={pageHref("home")}
+          onClick={(event) => handleInternalLink(event, () => onNavigate("home"))}
+          className="group flex min-w-0 items-center justify-start overflow-hidden"
+          aria-label="Դրախտ գլխավոր էջ"
+        >
           <picture>
             <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.logoMobile} />
             <img
@@ -457,19 +534,20 @@ function Nav({
               className={`h-8 w-auto max-w-[100px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:max-w-[180px] lg:h-7 lg:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
             />
           </picture>
-        </button>
+        </a>
 
         {/* Desktop nav */}
         <nav className="hidden items-center justify-center gap-4 whitespace-nowrap lg:flex xl:gap-8">
           {navLinks.map(({ label, page }) => (
-            <button
+            <a
               key={page}
-              onClick={() => onNavigate(page)}
+              href={pageHref(page)}
+              onClick={(event) => handleInternalLink(event, () => onNavigate(page))}
               className={`font-heading text-[11px] tracking-[0.08em] transition-colors relative group ${currentPage === page ? "text-foreground" : "text-foreground/70 hover:text-foreground"}`}
             >
               {label}
               <span className={`absolute -bottom-1 left-0 right-0 h-px bg-foreground/70 transition-transform duration-300 origin-left ${currentPage === page ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
-            </button>
+            </a>
           ))}
         </nav>
 
@@ -478,9 +556,14 @@ function Nav({
           <button onClick={onThemeToggle} className="grid h-8 w-8 place-items-center border border-border text-foreground/65 transition-colors hover:border-primary hover:text-primary" aria-label={themeMode === "dark" ? "Միացնել բաց ռեժիմը" : "Միացնել մուգ ռեժիմը"} title={themeMode === "dark" ? "Բաց ռեժիմ" : "Մուգ ռեժիմ"}>
             {themeMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <button onClick={() => onNavigate("shop")} className="hidden text-foreground/65 transition-colors hover:text-foreground lg:flex" aria-label="Որոնում">
+          <a
+            href={pageHref("shop")}
+            onClick={(event) => handleInternalLink(event, () => onNavigate("shop"))}
+            className="hidden text-foreground/65 transition-colors hover:text-foreground lg:flex"
+            aria-label="Որոնում"
+          >
             <Search size={17} />
-          </button>
+          </a>
           <button className="relative text-foreground/65 hover:text-foreground transition-colors" aria-label="Նախընտրածներ">
             <Heart size={17} />
             {wishlistCount > 0 && (
@@ -509,13 +592,14 @@ function Nav({
       <div className={`overflow-hidden border-t border-border transition-all duration-300 lg:hidden ${mobileOpen ? "max-h-80" : "max-h-0"}`}>
         <nav className="flex flex-col px-6 py-4 gap-4 bg-background/98">
           {navLinks.map(({ label, page }) => (
-            <button
+            <a
               key={page}
-              onClick={() => { onNavigate(page); setMobileOpen(false); }}
+              href={pageHref(page)}
+              onClick={(event) => handleInternalLink(event, () => { onNavigate(page); setMobileOpen(false); })}
               className={`font-heading text-xs tracking-[0.08em] text-left transition-colors ${currentPage === page ? "text-foreground" : "text-foreground/70"}`}
               >
                 {label}
-              </button>
+              </a>
             ))}
             <button
               onClick={() => { onAccountOpen(); setMobileOpen(false); }}
@@ -555,19 +639,21 @@ function HeroSection({ onNavigate }: { onNavigate: (p: Page) => void }) {
           style={{ opacity: loaded ? 1 : 0, transform: loaded ? "translateY(0)" : "translateY(24px)" }}
         >
           <div className="flex flex-wrap gap-2.5 md:gap-3">
-            <button
-              onClick={() => onNavigate("shop")}
+            <a
+              href={pageHref("shop")}
+              onClick={(event) => handleInternalLink(event, () => onNavigate("shop"))}
               className="group border border-white bg-white px-4 py-2.5 font-heading text-[11px] tracking-[0.04em] text-black transition-all hover:bg-white/85 md:px-5 md:py-3"
             >
               Տեսականի / Հավաքածուներ
               <ArrowRight size={13} className="ml-2 inline-block align-[-2px] transition-transform group-hover:translate-x-1" />
-            </button>
-            <button
-              onClick={() => onNavigate("custom")}
+            </a>
+            <a
+              href={pageHref("custom")}
+              onClick={(event) => handleInternalLink(event, () => onNavigate("custom"))}
               className="border border-white/35 bg-black/25 px-4 py-2.5 font-heading text-[11px] tracking-[0.04em] text-white transition-all hover:border-white hover:bg-white hover:text-black md:px-5 md:py-3"
             >
               Անհատական պատվերներ
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -600,9 +686,10 @@ function CollectionsPreview({
       {/* Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {featured.map((col, i) => (
-          <button
+          <a
             key={col.id}
-            onClick={() => onViewCollection(col.id)}
+            href={collectionHref(col.id)}
+            onClick={(event) => handleInternalLink(event, () => onViewCollection(col.id))}
             className={`group relative overflow-hidden ${i === 0 ? "col-span-2 row-span-2" : ""}`}
             style={{ aspectRatio: i === 0 ? "auto" : "3/4" }}
           >
@@ -620,17 +707,18 @@ function CollectionsPreview({
                 </div>
               </div>
             </div>
-          </button>
+          </a>
         ))}
       </div>
 
       <div className="text-center mt-10">
-        <button
-          onClick={() => onNavigate("collections")}
+        <a
+          href={pageHref("collections")}
+          onClick={(event) => handleInternalLink(event, () => onNavigate("collections"))}
           className="font-heading text-[11px] tracking-[0.25em] uppercase text-primary border-b border-primary/40 pb-0.5 hover:border-primary transition-colors"
         >
           Դիտել բոլոր հավաքածուները
-        </button>
+        </a>
       </div>
     </section>
   );
@@ -699,9 +787,10 @@ function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (categ
           className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {categories.map((category) => (
-            <button
+            <a
               key={category.id}
-              onClick={() => onViewCategory(category.id)}
+              href={categoryHref(category.id)}
+              onClick={(event) => handleInternalLink(event, () => onViewCategory(category.id))}
               className="group relative h-[360px] min-w-[78vw] snap-start overflow-hidden text-left sm:min-w-[360px] md:min-w-[420px]"
             >
               <img src={category.image} alt={category.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -714,7 +803,7 @@ function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (categ
                   <ArrowRight size={12} />
                 </div>
               </div>
-            </button>
+            </a>
           ))}
         </div>
       </div>
@@ -861,19 +950,21 @@ function HeritageBanner({ onNavigate }: { onNavigate: (p: Page) => void }) {
           Հայկական զարդարվեստի հնագույն նախշերը մենք վերածում ենք ժամանակակից արծաթյա զարդերի՝ պահպանելով ձևի նրբությունը, խորհրդանիշի ուժը և ձեռքի աշխատանքի արժեքը։
         </p>
         <div className="flex flex-wrap gap-4">
-          <button
-            onClick={() => onNavigate("collections")}
+          <a
+            href={pageHref("collections")}
+            onClick={(event) => handleInternalLink(event, () => onNavigate("collections"))}
             className="group px-7 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase flex items-center gap-3 hover:bg-primary/90 transition-all"
           >
             Դիտել հավաքածուները
             <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-          </button>
-          <button
-            onClick={() => onNavigate("about")}
+          </a>
+          <a
+            href={pageHref("about")}
+            onClick={(event) => handleInternalLink(event, () => onNavigate("about"))}
             className="px-7 py-3 border border-foreground/25 text-foreground/80 font-heading text-xs tracking-[0.2em] uppercase hover:border-primary hover:text-primary transition-all"
           >
             Մեր մասին
-          </button>
+          </a>
         </div>
       </div>
     </section>
@@ -1023,9 +1114,9 @@ function InstagramGallery() {
     <section className="py-16 bg-secondary/20">
       <div className="text-center mb-10 px-6">
         <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Հետևեք մեր աշխարհին</p>
-        <a href="#" className="font-heading text-2xl tracking-wider hover:text-primary transition-colors flex items-center justify-center gap-2">
+        <div className="font-heading text-2xl tracking-wider flex items-center justify-center gap-2">
           <Instagram size={20} className="text-primary" /> @areni.jewels
-        </a>
+        </div>
       </div>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-1 px-1">
         {images.map((src, i) => (
@@ -1117,9 +1208,9 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
           </div>
           <div className="flex gap-3">
             {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
-              <a key={i} href="#" className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-all">
+              <span key={i} className="w-8 h-8 border border-border flex items-center justify-center text-muted-foreground">
                 <Icon size={13} />
-              </a>
+              </span>
             ))}
           </div>
         </div>
@@ -1135,9 +1226,13 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
             <ul className="space-y-3">
               {links.map(([label, page]) => (
                 <li key={label}>
-                  <button onClick={() => onNavigate(page as Page)} className="font-body text-xs text-muted-foreground hover:text-primary transition-colors">
+                  <a
+                    href={pageHref(page as Page)}
+                    onClick={(event) => handleInternalLink(event, () => onNavigate(page as Page))}
+                    className="font-body text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
                     {label}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -1153,7 +1248,7 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center md:justify-end">
           {["Գաղտնիության քաղաքականություն", "Օգտագործման պայմաններ", "Cookie քաղաքականություն"].map((t) => (
-            <a key={t} href="#" className="font-body text-[10px] text-muted-foreground hover:text-primary transition-colors">{t}</a>
+            <span key={t} className="font-body text-[10px] text-muted-foreground">{t}</span>
           ))}
         </div>
       </div>
@@ -1248,6 +1343,10 @@ function ShopPage({
   const [filters, setFilters] = useState({ category: initialCategory || "all", collection: "all", inStock: false });
   const [sort, setSort] = useState("newest");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setFilters((current) => ({ ...current, category: initialCategory || "all" }));
+  }, [initialCategory]);
 
   const categoryOptions = useMemo(() => {
     const categories = new Map<string, string>();
@@ -1435,6 +1534,7 @@ function ProductDetailPage({
   productId,
   products,
   collections,
+  backHref,
   onBack,
   onAddToCart,
   onToggleWishlist,
@@ -1445,6 +1545,7 @@ function ProductDetailPage({
   productId: number;
   products: Product[];
   collections: Collection[];
+  backHref: string;
   onBack: () => void;
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
@@ -1511,9 +1612,13 @@ function ProductDetailPage({
       <div className="pt-32 min-h-screen px-6 text-center">
         <ArevakhachSymbol size={36} className="text-primary mx-auto mb-5" />
         <p className="font-heading text-lg tracking-wider mb-4">{message || "Այս զարդը ժամանակավորապես հասանելի չէ։"}</p>
-        <button onClick={onBack} className="px-7 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase">
+        <a
+          href={backHref}
+          onClick={(event) => handleInternalLink(event, onBack)}
+          className="inline-block px-7 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase"
+        >
           Վերադառնալ զարդերին
-        </button>
+        </a>
       </div>
     );
   }
@@ -1538,9 +1643,13 @@ function ProductDetailPage({
   return (
     <div className="pt-24 min-h-screen">
       <div className="px-6 md:px-12 py-5 border-b border-border flex items-center justify-between gap-4">
-        <button onClick={onBack} className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground hover:text-primary transition-colors">
+        <a
+          href={backHref}
+          onClick={(event) => handleInternalLink(event, onBack)}
+          className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground hover:text-primary transition-colors"
+        >
           Վերադառնալ զարդերին
-        </button>
+        </a>
         <p className="font-body text-[10px] tracking-[0.25em] uppercase text-primary">{product.subtitle}</p>
       </div>
 
@@ -1599,15 +1708,15 @@ function ProductDetailPage({
               </p>
               <div className="flex flex-wrap gap-2">
                 {productCollections.map((collection) => (
-                <button
+                <a
                   key={collection.id}
-                  type="button"
-                  onClick={() => onViewCollection(collection.id)}
+                  href={collectionHref(collection.id)}
+                  onClick={(event) => handleInternalLink(event, () => onViewCollection(collection.id))}
                   className="group inline-flex items-center gap-2 border border-primary/35 px-4 py-2 font-heading text-[10px] uppercase tracking-[0.18em] text-primary transition-colors hover:border-primary hover:bg-primary hover:text-black"
                 >
                   {collection.name}
                   <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
-                </button>
+                </a>
               ))}
               </div>
             </div>
@@ -1736,9 +1845,13 @@ function CollectionDetailPage({
   return (
     <div className="pt-24 min-h-screen">
       <div className="px-6 md:px-12 py-5 border-b border-border flex items-center justify-between gap-4">
-        <button onClick={onBack} className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground hover:text-primary transition-colors">
+        <a
+          href={pageHref("collections")}
+          onClick={(event) => handleInternalLink(event, onBack)}
+          className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground hover:text-primary transition-colors"
+        >
           Վերադառնալ հավաքածուներին
-        </button>
+        </a>
         <p className="font-body text-[10px] tracking-[0.25em] uppercase text-primary">{collection.count} զարդ</p>
       </div>
 
@@ -1777,12 +1890,13 @@ function CollectionDetailPage({
             >
               {collectionAvailable ? "Գնել ամբողջ հավաքածուն" : "Հավաքածուն հասանելի չէ"}
             </button>
-            <a
-              href="#collection-products"
+            <button
+              type="button"
+              onClick={() => document.getElementById("collection-products")?.scrollIntoView({ behavior: "smooth", block: "start" })}
               className="flex-1 py-4 border border-border text-center font-heading text-xs tracking-[0.22em] uppercase text-foreground/80 hover:border-primary hover:text-primary transition-colors"
             >
               Ընտրել առանձին զարդեր
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -1808,6 +1922,7 @@ function CollectionDetailPage({
                 onToggleWishlist={onToggleWishlist}
                 onViewProduct={(id) => onViewProduct(id, collection.id)}
                 isWishlisted={wishlist.includes(product.id)}
+                returnCollectionId={collection.id}
               />
             ))}
           </div>
@@ -1858,9 +1973,10 @@ function CollectionsPage({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {collections.map((col) => (
-            <button
+            <a
               key={col.id}
-              onClick={() => onViewCollection(col.id)}
+              href={collectionHref(col.id)}
+              onClick={(event) => handleInternalLink(event, () => onViewCollection(col.id))}
               className="group relative overflow-hidden text-left"
             >
               <div className="relative aspect-[3/4] overflow-hidden">
@@ -1882,7 +1998,7 @@ function CollectionsPage({
                   </div>
                 </div>
               </div>
-            </button>
+            </a>
             ))}
           </div>
         )}
@@ -1896,12 +2012,13 @@ function CollectionsPage({
           <p className="font-body text-sm text-muted-foreground max-w-md mx-auto mb-7 leading-relaxed">
             Պատվիրեք ձեր գաղափարին համապատասխան զարդ՝ խորհրդանիշով, քարով կամ հատուկ ձևով։
           </p>
-          <button
-            onClick={() => onNavigate("custom")}
+          <a
+            href={pageHref("custom")}
+            onClick={(event) => handleInternalLink(event, () => onNavigate("custom"))}
             className="px-8 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors"
           >
             Սկսել պատվերը
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -2887,15 +3004,19 @@ export default function App() {
     const saved = window.localStorage.getItem("drakht.theme");
     return saved === "light" || saved === "dark" ? saved : "dark";
   });
-  const [page, setPage] = useState<Page>("home");
-  const [shopCategory, setShopCategory] = useState("all");
+  const initialRoute = useMemo(
+    () => parseHashRoute(typeof window === "undefined" ? "#/" : window.location.hash),
+    [],
+  );
+  const [page, setPage] = useState<Page>(initialRoute.page);
+  const [shopCategory, setShopCategory] = useState(initialRoute.category);
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [shopInfo, setShopInfo] = useState<ShopInfo>(DEFAULT_SHOP_INFO);
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
-  const [productReturnCollectionId, setProductReturnCollectionId] = useState<string | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(initialRoute.productId);
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(initialRoute.collectionId);
+  const [productReturnCollectionId, setProductReturnCollectionId] = useState<string | null>(initialRoute.returnCollectionId);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogMessage, setCatalogMessage] = useState("");
   const [collectionsMessage, setCollectionsMessage] = useState("");
@@ -2926,11 +3047,47 @@ export default function App() {
     [collections, selectedCollectionId],
   );
 
+  const applyRoute = (route: RouteState, behavior: ScrollBehavior = "smooth") => {
+    setPage(route.page);
+    setShopCategory(route.category);
+    setSelectedProductId(route.productId);
+    setSelectedCollectionId(route.collectionId);
+    setProductReturnCollectionId(route.returnCollectionId);
+    setMobileOpen(false);
+
+    if (route.page === "about") {
+      window.setTimeout(() => {
+        document.getElementById("about-us")?.scrollIntoView({ behavior, block: "start" });
+      }, 80);
+    } else {
+      window.scrollTo({ top: 0, behavior });
+    }
+  };
+
+  const openRoute = (href: string) => {
+    if (window.location.hash === href) {
+      applyRoute(parseHashRoute(href));
+      return;
+    }
+    window.location.hash = href.slice(1);
+  };
+
   useLayoutEffect(() => {
     document.documentElement.classList.toggle("dark", themeMode === "dark");
     document.documentElement.dataset.theme = themeMode;
     window.localStorage.setItem("drakht.theme", themeMode);
   }, [themeMode]);
+
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.history.replaceState(window.history.state, "", pageHref("home"));
+    }
+
+    applyRoute(parseHashRoute(window.location.hash), "auto");
+    const handleHashChange = () => applyRoute(parseHashRoute(window.location.hash));
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -3045,49 +3202,19 @@ export default function App() {
   }, [cartOpen]);
 
   const navigate = (p: Page) => {
-    if (p === "about") {
-      setSelectedProductId(null);
-      setSelectedCollectionId(null);
-      setProductReturnCollectionId(null);
-      setPage("home");
-      setMobileOpen(false);
-      window.setTimeout(() => {
-        document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 80);
-      return;
-    }
-
-    if (p !== "product") setSelectedProductId(null);
-    if (p !== "collection") setSelectedCollectionId(null);
-    if (p !== "product") setProductReturnCollectionId(null);
-    if (p === "shop") setShopCategory("all");
-    setPage(p);
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openRoute(pageHref(p));
   };
 
   const viewCategory = (category: string) => {
-    setShopCategory(category);
-    setPage("shop");
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openRoute(categoryHref(category));
   };
 
   const viewProduct = (id: number, returnCollectionId?: string) => {
-    setSelectedProductId(id);
-    setProductReturnCollectionId(returnCollectionId ?? null);
-    setPage("product");
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openRoute(productHref(id, returnCollectionId));
   };
 
   const viewCollection = (id: string) => {
-    setSelectedCollectionId(id);
-    setSelectedProductId(null);
-    setProductReturnCollectionId(null);
-    setPage("collection");
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    openRoute(collectionHref(id));
   };
 
   const refreshRemoteCart = async () => {
@@ -3345,7 +3472,7 @@ export default function App() {
       />
 
       <main>
-        {page === "home" && (
+        {(page === "home" || page === "about") && (
           <HomePage
             onNavigate={navigate}
             onViewCategory={viewCategory}
@@ -3380,6 +3507,7 @@ export default function App() {
             productId={selectedProductId}
             products={products}
             collections={collections}
+            backHref={productReturnCollectionId ? collectionHref(productReturnCollectionId) : pageHref("shop")}
             onBack={() => productReturnCollectionId ? viewCollection(productReturnCollectionId) : navigate("shop")}
             onAddToCart={addToCart}
             onToggleWishlist={toggleWishlist}
