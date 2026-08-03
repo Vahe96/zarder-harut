@@ -1723,8 +1723,9 @@ function ProductDetailPage({
               href={product.videoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-8 flex min-h-12 w-full items-center justify-center border border-border px-5 py-3 font-heading text-[10px] uppercase tracking-[0.22em] text-foreground transition-colors hover:border-primary hover:text-primary"
+              className="mb-8 flex min-h-14 w-full items-center justify-center gap-3 border border-[#ff0000] bg-[#ff0000] px-5 py-3 font-heading text-[11px] uppercase tracking-[0.2em] text-white shadow-sm transition-colors hover:border-[#d90000] hover:bg-[#d90000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff0000]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
+              <Youtube size={21} fill="currentColor" strokeWidth={1.8} aria-hidden="true" />
               Տեսնել տեսանյութը
             </a>
           )}
