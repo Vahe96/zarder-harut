@@ -338,8 +338,8 @@ function ProductCard({
       {/* Info */}
       <div className="pt-4 pb-2">
         <p className="font-body text-[10px] tracking-[0.18em] text-muted-foreground uppercase mb-1">{product.subtitle}</p>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="w-full min-w-0 sm:w-auto">
+        <div className="flex flex-col gap-3">
+          <div className="w-full min-w-0">
             <a
               href={productHref(product.id)}
               onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
@@ -356,19 +356,19 @@ function ProductCard({
               )}
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+          <div className="flex w-full items-stretch gap-2 pt-0.5">
             <button
               onClick={handleAdd}
               disabled={!product.inStock}
-              className="grid h-8 w-8 place-items-center border border-border bg-black/20 text-muted-foreground transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
-              aria-label={product.inStock ? "Add to cart" : "Out of stock"}
-              title={product.inStock ? "Add to cart" : "Out of stock"}
+              className="flex min-h-10 min-w-0 flex-1 items-center justify-center bg-primary px-1.5 py-2 text-center font-heading text-[9px] leading-tight tracking-[0.06em] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground sm:px-3 sm:text-[10px] sm:tracking-[0.1em]"
+              aria-label={product.inStock ? "Ավելացնել զամբյուղ" : "Առկա չէ"}
+              title={product.inStock ? "Ավելացնել զամբյուղ" : "Առկա չէ"}
             >
-              {added ? <Check size={14} /> : <ShoppingBag size={14} />}
+              {product.inStock ? (added ? "Ավելացված է" : "Ավելացնել զամբյուղ") : "Առկա չէ"}
             </button>
             <button
               onClick={handleWishlist}
-              className={`grid h-8 w-8 place-items-center border transition-colors ${isWishlisted ? "border-primary bg-primary text-primary-foreground" : "border-border bg-black/20 text-muted-foreground hover:border-primary hover:text-primary"}`}
+              className={`grid h-10 w-10 shrink-0 place-items-center border transition-colors ${isWishlisted ? "border-primary bg-primary text-primary-foreground" : "border-border bg-black/20 text-muted-foreground hover:border-primary hover:text-primary"}`}
               aria-label="Նախընտրածներ"
               title="Նախընտրածներ"
             >
@@ -1259,24 +1259,17 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 
 function HomePage({
-  onNavigate, onViewCategory, onAddToCart, onToggleWishlist, onViewProduct, onViewCollection, wishlist, products, collections, isLoading, catalogMessage, onRetry,
+  onNavigate, onViewCategory, onViewCollection, products, collections, isLoading, catalogMessage, onRetry,
 }: {
   onNavigate: (p: Page) => void;
   onViewCategory: (category: string) => void;
-  onAddToCart: (p: Product, quantity?: number) => void;
-  onToggleWishlist: (id: number) => void;
-  onViewProduct: (id: number) => void;
   onViewCollection: (id: string) => void;
-  wishlist: number[];
   products: Product[];
   collections: Collection[];
   isLoading: boolean;
   catalogMessage: string;
   onRetry: () => void;
 }) {
-  const bestSellers = products.filter((p) => p.isFeatured || p.isBestSeller).slice(0, 4);
-  const bestSellerShelf = (bestSellers.length ? bestSellers : products.slice(4)).slice(0, 4);
-
   return (
     <>
       <HeroSection onNavigate={onNavigate} />
@@ -1298,15 +1291,6 @@ function HomePage({
       )}
       <CategoryCarousel onViewCategory={onViewCategory} products={products} />
       <HeritageBanner onNavigate={onNavigate} />
-      <ProductsGrid
-        title="Սիրված զարդեր"
-        subtitle="Ամենաշատ ընտրված"
-        products={bestSellerShelf.length ? bestSellerShelf : products.slice(0, 4)}
-        onAddToCart={onAddToCart}
-        onToggleWishlist={onToggleWishlist}
-        onViewProduct={onViewProduct}
-        wishlist={wishlist}
-      />
       <BrandStorySection />
       <FeaturesStrip />
       <ReviewsSection />
@@ -3431,11 +3415,7 @@ export default function App() {
           <HomePage
             onNavigate={navigate}
             onViewCategory={viewCategory}
-            onAddToCart={addToCart}
-            onToggleWishlist={toggleWishlist}
-            onViewProduct={viewProduct}
             onViewCollection={viewCollection}
-            wishlist={wishlist}
             products={products}
             collections={collections}
             isLoading={catalogLoading}
