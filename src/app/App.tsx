@@ -916,7 +916,7 @@ function ProductCategorySlider({
 
 function HeritageBanner({ onNavigate }: { onNavigate: (p: Page) => void }) {
   return (
-    <section className="relative overflow-hidden min-h-[480px] flex items-center">
+    <section className="relative mb-16 flex min-h-[480px] items-center overflow-hidden md:mb-24">
       <img
         src="https://images.unsplash.com/photo-1529224677962-8f4c65e152fa?w=1600&h=900&fit=crop&auto=format"
         alt="Pomegranates — symbol of Armenian abundance"
