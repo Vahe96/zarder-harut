@@ -23,6 +23,7 @@ export interface Product {
   descriptionHtml?: string;
   colors?: ProductOption[];
   sizes?: ProductOption[];
+  videoUrl?: string;
 }
 
 export interface Collection {
@@ -673,6 +674,7 @@ export function mapBackendProduct(
     descriptionHtml: product.description_html || undefined,
     colors: normalizeOptions(product.colors),
     sizes: normalizeOptions(product.sizes),
+    videoUrl: getYoutubeUrlFromInfo(product.info),
   };
 }
 
@@ -750,6 +752,45 @@ function normalizeBadges(value: unknown): string[] {
 function getOptionString(value: unknown): string | undefined {
   if (typeof value === "string" && value.trim()) return value.trim();
   if (typeof value === "number") return String(value);
+  return undefined;
+}
+
+function getYoutubeUrlFromInfo(value: unknown): string | undefined {
+  let info: Record<string, unknown> | undefined;
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    info = value as Record<string, unknown>;
+  } else if (typeof value === "string" && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        info = parsed as Record<string, unknown>;
+      }
+    } catch {
+      return undefined;
+    }
+  }
+
+  const firstKey = info ? Object.keys(info)[0]?.trim() : undefined;
+  if (!firstKey) return undefined;
+
+  try {
+    const url = new URL(firstKey);
+    const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
+    const isYoutubeHost =
+      hostname === "youtu.be" ||
+      hostname === "youtube.com" ||
+      hostname.endsWith(".youtube.com") ||
+      hostname === "youtube-nocookie.com" ||
+      hostname.endsWith(".youtube-nocookie.com");
+
+    if ((url.protocol === "https:" || url.protocol === "http:") && isYoutubeHost) {
+      return url.toString();
+    }
+  } catch {
+    return undefined;
+  }
+
   return undefined;
 }
 
