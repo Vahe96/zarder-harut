@@ -502,8 +502,8 @@ function Nav({
   onThemeToggle: () => void;
 }) {
   const navLinks: { label: string; page: Page }[] = [
-    { label: "Հայկականը", page: "home" },
-    { label: "Զարդերը", page: "shop" },
+    { label: "Դրախտը", page: "home" },
+    { label: "Զարդատեսակներ", page: "shop" },
     { label: "Հավաքածուներ", page: "collections" },
     { label: "Մեր մասին", page: "about" },
     { label: "Անհատական պատվերներ", page: "custom" },
@@ -517,13 +517,13 @@ function Nav({
           href={pageHref("home")}
           onClick={(event) => handleInternalLink(event, () => onNavigate("home"))}
           className="group flex min-w-0 items-center justify-start overflow-hidden"
-          aria-label="Դրախտ գլխավոր էջ"
+          aria-label="Դրախտը՝ գլխավոր էջ"
         >
           <picture>
             <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.logoMobile} />
             <img
               src={DRAKHT_ASSETS.logoWeb}
-              alt="Դրախտ"
+              alt="Դրախտը"
               className={`h-8 w-auto max-w-[100px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:max-w-[180px] lg:h-7 lg:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
             />
           </picture>
@@ -618,7 +618,7 @@ function HeroSection({ onNavigate }: { onNavigate: (p: Page) => void }) {
         <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.heroMobile} />
         <img
           src={DRAKHT_ASSETS.heroWeb}
-          alt="Դրախտ հայկական զարդերի գլխավոր էջ"
+          alt="Դրախտը՝ հայկական զարդատեսակների գլխավոր էջ"
           className="h-full w-full object-cover object-center opacity-95"
         />
       </picture>
@@ -690,7 +690,7 @@ function CollectionsPreview({
               <img src={col.image} alt={col.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-                <p className="font-body text-[9px] tracking-[0.25em] text-primary/80 uppercase mb-1">{col.count} զարդ</p>
+                <p className="font-body text-[9px] tracking-[0.25em] text-primary/80 uppercase mb-1">{col.count} զարդատեսակ</p>
                 <h3 className="font-heading text-base md:text-lg tracking-wide text-white leading-snug">{col.name}</h3>
                 <p className="mt-1 font-heading text-xs tracking-wide text-primary">{formatAmdPrice(col.price)}</p>
                 {i === 0 && <p className="font-body text-xs text-white/60 mt-1.5 leading-relaxed hidden md:block">{col.tagline}</p>}
@@ -879,7 +879,7 @@ function ProductCategorySlider({
           type="button"
           onClick={() => scroll("left")}
           className="absolute left-0 top-[42%] z-10 grid h-11 w-11 -translate-y-1/2 place-items-center border border-primary/35 bg-black/70 text-primary transition-colors hover:border-primary hover:bg-primary hover:text-black md:-left-5"
-          aria-label="Նախորդ զարդերը"
+          aria-label="Նախորդ զարդատեսակները"
         >
           <ChevronLeft size={19} />
         </button>
@@ -887,7 +887,7 @@ function ProductCategorySlider({
           type="button"
           onClick={() => scroll("right")}
           className="absolute right-0 top-[42%] z-10 grid h-11 w-11 -translate-y-1/2 place-items-center border border-primary/35 bg-black/70 text-primary transition-colors hover:border-primary hover:bg-primary hover:text-black md:-right-5"
-          aria-label="Հաջորդ զարդերը"
+          aria-label="Հաջորդ զարդատեսակները"
         >
           <ChevronRight size={19} />
         </button>
@@ -940,7 +940,7 @@ function HeritageBanner({ onNavigate }: { onNavigate: (p: Page) => void }) {
           <span className="text-primary">այսօրվա մեջ</span>
         </h2>
         <p className="font-body text-sm md:text-base text-foreground/65 leading-relaxed mb-8 font-light max-w-xl">
-          Հայկական զարդարվեստի հնագույն նախշերը մենք վերածում ենք ժամանակակից արծաթյա զարդերի՝ պահպանելով ձևի նրբությունը, խորհրդանիշի ուժը և ձեռքի աշխատանքի արժեքը։
+          Հայկական զարդարվեստի հնագույն նախշերը մենք վերածում ենք ժամանակակից արծաթյա զարդատեսակների՝ պահպանելով ձևի նրբությունը, խորհրդանիշի ուժը և ձեռքի աշխատանքի արժեքը։
         </p>
         <div className="flex flex-wrap gap-4">
           <a
@@ -990,8 +990,8 @@ function BrandStorySection() {
         </h2>
         <OrnamentalDivider className="max-w-48 mb-7" />
         <div className="space-y-4 font-body text-sm text-foreground/70 leading-relaxed font-light">
-          <p>«Դրախտ»-ը հայկական զարդերի բրենդ է, որտեղ արծաթը, ձեռքի աշխատանքը և հայկական խորհրդանշանները միավորվում են ժամանակակից նրբագեղության մեջ։ Մեր զարդերը ստեղծվում են այն մարդկանց համար, ովքեր ուզում են կրել ոչ միայն գեղեցիկ իր, այլ նաև հիշողություն, ինքնություն և պատմություն։</p>
-          <p>Յուրաքանչյուր զարդ ծնվում է մանրակրկիտ աշխատանքի արդյունքում՝ էսքիզից մինչև վերջնական փայլեցում։ Մենք կարևորում ենք մաքուր ձևերը, հարմար կրելը, որակյալ քարերի ընտրությունը և այնպիսի դիզայնը, որը կարող է ապրել ամենօրյա կերպարում ու մնալ արժեքավոր տարիների ընթացքում։</p>
+          <p>«Դրախտը» հայկական զարդատեսակների բրենդ է, որտեղ արծաթը, ձեռքի աշխատանքը և հայկական խորհրդանշանները միավորվում են ժամանակակից նրբագեղության մեջ։ Մեր զարդատեսակները ստեղծվում են այն մարդկանց համար, ովքեր ուզում են կրել ոչ միայն գեղեցիկ իր, այլ նաև հիշողություն, ինքնություն և պատմություն։</p>
+          <p>Յուրաքանչյուր զարդատեսակ ծնվում է մանրակրկիտ աշխատանքի արդյունքում՝ էսքիզից մինչև վերջնական փայլեցում։ Մենք կարևորում ենք մաքուր ձևերը, հարմար կրելը, որակյալ քարերի ընտրությունը և այնպիսի դիզայնը, որը կարող է ապրել ամենօրյա կերպարում ու մնալ արժեքավոր տարիների ընթացքում։</p>
           <p>Մեր ոգեշնչումը հայկական զարդարվեստն է՝ նռան, Արարատի, արևախաչի, տառերի և հնագույն նախշերի լեզուն։ Այդ ժառանգությունը մենք ներկայացնում ենք զուսպ, ժամանակակից և կրելի ձևով։</p>
         </div>
         <div className="mt-8 flex items-center gap-4">
@@ -1001,8 +1001,8 @@ function BrandStorySection() {
             </div>
           </div>
           <div>
-            <p className="font-heading text-sm tracking-wide text-foreground">Դրախտ</p>
-            <p className="font-body text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Հայկական արծաթյա զարդեր</p>
+            <p className="font-heading text-sm tracking-wide text-foreground">Դրախտը</p>
+            <p className="font-body text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Հայկական արծաթյա զարդատեսակներ</p>
           </div>
         </div>
       </div>
@@ -1015,8 +1015,8 @@ function BrandStorySection() {
 function FeaturesStrip() {
   const features = [
     { icon: <Gem size={20} />, title: "Որակյալ քարեր", desc: "Ընտրված քարեր և ստուգված մատակարարներ" },
-    { icon: <Award size={20} />, title: "Ձեռքի աշխատանք", desc: "Մանրակրկիտ մշակված հայկական զարդեր" },
-    { icon: <Shield size={20} />, title: "Երաշխիք", desc: "Յուրաքանչյուր զարդ ստուգվում է առաքումից առաջ" },
+    { icon: <Award size={20} />, title: "Ձեռքի աշխատանք", desc: "Մանրակրկիտ մշակված հայկական զարդատեսակներ" },
+    { icon: <Shield size={20} />, title: "Երաշխիք", desc: "Յուրաքանչյուր զարդատեսակ ստուգվում է առաքումից առաջ" },
     { icon: <Package size={20} />, title: "Նվերային փաթեթավորում", desc: "Ներկայանալի տուփ յուրաքանչյուր պատվերի համար" },
     { icon: <RefreshCw size={20} />, title: "Փոխանակման հնարավորություն", desc: "Հարմար պայմաններ պատվերը փոխելու համար" },
     { icon: <Clock size={20} />, title: "Անհատական պատվեր", desc: "Պատրաստում ըստ ձեր նախընտրած գաղափարի" },
@@ -1140,9 +1140,9 @@ function NewsletterSection() {
     <section className="px-6 md:px-12 py-20 border-t border-border">
       <div className="max-w-xl mx-auto text-center">
         <ArevakhachSymbol size={36} className="text-primary mx-auto mb-6" />
-        <h2 className="font-heading text-2xl md:text-3xl tracking-wider mb-3">Ստացեք Դրախտի նորությունները</h2>
+        <h2 className="font-heading text-2xl md:text-3xl tracking-wider mb-3">Ստացեք «Դրախտը» բրենդի նորությունները</h2>
         <p className="font-body text-sm text-muted-foreground mb-8 leading-relaxed">
-          Նոր հավաքածուներ, անհատական պատվերների պատմություններ և հատուկ առաջարկներ՝ ուղարկված նույն խնամքով, ինչ մեր զարդերը։
+          Նոր հավաքածուներ, անհատական պատվերների պատմություններ և հատուկ առաջարկներ՝ ուղարկված նույն խնամքով, ինչ մեր զարդատեսակները։
         </p>
         {sent ? (
           <div className="flex items-center justify-center gap-3 py-4 border border-primary/30 text-primary">
@@ -1184,12 +1184,12 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
           <div className="flex items-center gap-2.5 mb-5">
             <ArevakhachSymbol size={28} className="text-primary" />
             <div>
-              <p className="font-display text-lg tracking-[0.3em] text-foreground leading-none">ԴՐԱԽՏ</p>
-              <p className="font-body text-[8px] tracking-[0.3em] text-muted-foreground uppercase">Հայկական զարդեր</p>
+              <p className="font-display text-lg tracking-[0.3em] text-foreground leading-none">ԴՐԱԽՏԸ</p>
+              <p className="font-body text-[8px] tracking-[0.3em] text-muted-foreground uppercase">Հայկական զարդատեսակներ</p>
             </div>
           </div>
           <p className="font-body text-xs text-muted-foreground leading-relaxed mb-6">
-            Հայկական արծաթյա զարդեր՝ ոգեշնչված ժառանգությունից և ստեղծված ժամանակակից կրելու համար։
+            Հայկական արծաթյա զարդատեսակներ՝ ոգեշնչված ժառանգությունից և ստեղծված ժամանակակից կրելու համար։
           </p>
           <div className="space-y-2 mb-6">
             <a href={`tel:${shopInfo.phone.replace(/\s/g, "")}`} className="font-body text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
@@ -1212,7 +1212,7 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
         {[
           { title: "Հավաքածուներ", links: [["Ժառանգություն", "collections"], ["Հայկական տառեր", "collections"], ["Նուռ", "collections"], ["Արարատ", "collections"], ["Ամենօրյա", "collections"]] },
           { title: "Բրենդ", links: [["Մեր մասին", "about"], ["Ձեռքի աշխատանք", "about"], ["Անհատական պատվեր", "custom"], ["Կապ", "contact"]] },
-          { title: "Օգնություն", links: [["Կապ մեզ հետ", "contact"], ["Հարցեր", "contact"], ["Առաքում և փոխանակում", "contact"], ["Զարդերի խնամք", "contact"]] },
+          { title: "Օգնություն", links: [["Կապ մեզ հետ", "contact"], ["Հարցեր", "contact"], ["Առաքում և փոխանակում", "contact"], ["Զարդատեսակների խնամք", "contact"]] },
         ].map(({ title, links }) => (
           <div key={title}>
             <p className="font-heading text-[10px] tracking-[0.28em] uppercase text-foreground mb-5">{title}</p>
@@ -1237,7 +1237,7 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="font-body text-[10px] text-muted-foreground">
-          © 2026 Դրախտ։ Բոլոր իրավունքները պաշտպանված են։
+          © 2026 Դրախտը։ Բոլոր իրավունքները պաշտպանված են։
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center md:justify-end">
           {["Գաղտնիության քաղաքականություն", "Օգտագործման պայմաններ", "Cookie քաղաքականություն"].map((t) => (
@@ -1328,7 +1328,7 @@ function ShopPage({
   const categoryOptions = useMemo(() => {
     const categories = new Map<string, string>();
     products.forEach((product) => categories.set(product.category, product.categoryLabel || titleCase(product.category)));
-    return [["all", "Բոլոր զարդերը"], ...Array.from(categories.entries())] as [string, string][];
+    return [["all", "Բոլոր զարդատեսակները"], ...Array.from(categories.entries())] as [string, string][];
   }, [products]);
 
   const collectionOptions = useMemo(() => {
@@ -1408,7 +1408,7 @@ function ShopPage({
       {/* Page header */}
       <div className="px-6 md:px-12 py-10 border-b border-border text-center">
         <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Ամբողջ տեսականին</p>
-        <h1 className="font-heading text-3xl md:text-4xl tracking-wider">Բոլոր զարդերը</h1>
+        <h1 className="font-heading text-3xl md:text-4xl tracking-wider">Բոլոր զարդատեսակները</h1>
         <OrnamentalDivider className="max-w-xs mx-auto mt-4" />
       </div>
 
@@ -1427,7 +1427,7 @@ function ShopPage({
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Որոնել զարդեր..."
+                placeholder="Որոնել զարդատեսակներ..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 bg-input-background border border-border font-body text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
@@ -1458,7 +1458,7 @@ function ShopPage({
             </div>
 
             <p className="font-body text-[10px] text-muted-foreground tracking-wider ml-auto">
-              {isLoading ? "Բեռնվում է..." : `${filtered.length} զարդ`}
+              {isLoading ? "Բեռնվում է..." : `${filtered.length} զարդատեսակ`}
             </p>
           </div>
 
@@ -1483,7 +1483,7 @@ function ShopPage({
           {/* Grid */}
           {filtered.length === 0 ? (
             <div className="text-center py-20">
-              <p className="font-heading text-sm tracking-wider text-muted-foreground">Ձեր ընտրությանը համապատասխան զարդեր չկան։</p>
+              <p className="font-heading text-sm tracking-wider text-muted-foreground">Ձեր ընտրությանը համապատասխան զարդատեսակներ չկան։</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3">
@@ -1575,7 +1575,7 @@ function ProductDetailPage({
   if (!product && loading) {
     return (
       <div className="pt-32 min-h-screen flex items-center justify-center">
-        <p className="font-heading text-xs tracking-[0.25em] uppercase text-muted-foreground">Զարդը բեռնվում է</p>
+        <p className="font-heading text-xs tracking-[0.25em] uppercase text-muted-foreground">Զարդատեսակը բեռնվում է</p>
       </div>
     );
   }
@@ -1584,7 +1584,7 @@ function ProductDetailPage({
     return (
       <div className="pt-32 min-h-screen px-6 text-center">
         <ArevakhachSymbol size={36} className="text-primary mx-auto mb-5" />
-        <p className="font-heading text-lg tracking-wider mb-4">{message || "Այս զարդը ժամանակավորապես հասանելի չէ։"}</p>
+        <p className="font-heading text-lg tracking-wider mb-4">{message || "Այս զարդատեսակը ժամանակավորապես հասանելի չէ։"}</p>
       </div>
     );
   }
@@ -1659,7 +1659,7 @@ function ProductDetailPage({
             <div className="mb-7 border border-border bg-black/20 p-4">
               <p className="mb-2 font-heading text-[10px] uppercase tracking-[0.25em] text-foreground">Հավաքածու</p>
               <p className="mb-4 font-body text-xs leading-relaxed text-muted-foreground">
-                Այս զարդը ներառված է ստորև նշված հավաքածուում։ Սեղմեք անունը՝ ամբողջ հավաքածուն տեսնելու համար։
+                Այս զարդատեսակը ներառված է ստորև նշված հավաքածուում։ Սեղմեք անունը՝ ամբողջ հավաքածուն տեսնելու համար։
               </p>
               <div className="flex flex-wrap gap-2">
                 {productCollections.map((collection) => (
@@ -1751,7 +1751,7 @@ function ProductDetailPage({
 
       {categoryProducts.length > 0 && (
         <ProductCategorySlider
-          title="Նույն կատեգորիայի զարդեր"
+          title="Նույն կատեգորիայի զարդատեսակներ"
           subtitle="Ձեզ կարող է հետաքրքրել"
           products={categoryProducts}
           onAddToCart={onAddToCart}
@@ -1819,7 +1819,7 @@ function CollectionDetailPage({
               <p className="font-heading text-xl text-primary">{formatAmdPrice(collection.price)}</p>
             </div>
             <div className="border border-border p-5">
-              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-2">Առանձին զարդերով</p>
+              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-2">Առանձին զարդատեսակներով</p>
               <p className="font-heading text-xl text-primary">{formatAmdPrice(productsTotal)}</p>
             </div>
           </div>
@@ -1837,7 +1837,7 @@ function CollectionDetailPage({
               onClick={() => document.getElementById("collection-products")?.scrollIntoView({ behavior: "smooth", block: "start" })}
               className="flex-1 py-4 border border-border text-center font-heading text-xs tracking-[0.22em] uppercase text-foreground/80 hover:border-primary hover:text-primary transition-colors"
             >
-              Ընտրել առանձին զարդեր
+              Ընտրել առանձին զարդատեսակներ
             </button>
           </div>
         </div>
@@ -1845,14 +1845,14 @@ function CollectionDetailPage({
 
       <section id="collection-products" className="px-6 md:px-12 py-16 md:py-24 bg-secondary/30 scroll-mt-24">
         <div className="text-center mb-12">
-          <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Հավաքածուի զարդերը</p>
+          <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Հավաքածուի զարդատեսակները</p>
           <h2 className="font-heading text-3xl md:text-4xl tracking-wider">{collection.name}</h2>
           <OrnamentalDivider className="mx-auto mt-5 w-[min(72vw,720px)]" />
         </div>
 
         {collectionProducts.length === 0 ? (
           <div className="text-center py-16 border border-border bg-background/40">
-            <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդեր չկան։</p>
+            <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդատեսակներ չկան։</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10">
@@ -1929,7 +1929,7 @@ function CollectionsPage({
                 <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-primary/0 group-hover:border-primary/60 transition-all duration-500" />
 
                 <div className="absolute bottom-0 left-0 right-0 p-7">
-                  <p className="font-body text-[9px] tracking-[0.3em] text-primary uppercase mb-2">{col.count} զարդ</p>
+                  <p className="font-body text-[9px] tracking-[0.3em] text-primary uppercase mb-2">{col.count} զարդատեսակ</p>
                   <h3 className="font-heading text-xl tracking-wide text-white mb-2">{col.name}</h3>
                   <p className="font-heading text-sm tracking-wide text-primary mb-3">{formatAmdPrice(col.price)}</p>
                   <p className="font-body text-xs text-white/60 leading-relaxed mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-400">{col.tagline}</p>
@@ -1951,7 +1951,7 @@ function CollectionsPage({
           <ArevakhachSymbol size={32} className="text-primary mx-auto mb-5" />
           <h3 className="font-heading text-xl tracking-wider mb-3">Անհատական պատվերներ</h3>
           <p className="font-body text-sm text-muted-foreground max-w-md mx-auto mb-7 leading-relaxed">
-            Պատվիրեք ձեր գաղափարին համապատասխան զարդ՝ խորհրդանիշով, քարով կամ հատուկ ձևով։
+            Պատվիրեք ձեր գաղափարին համապատասխան զարդատեսակ՝ խորհրդանիշով, քարով կամ հատուկ ձևով։
           </p>
           <a
             href={pageHref("custom")}
@@ -2080,7 +2080,7 @@ function CustomPage() {
         <div className="absolute inset-0 bg-background/80" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
           <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Անհատական պատվեր</p>
-          <h1 className="font-heading text-4xl md:text-5xl tracking-wider">Պատվիրեք ձեր զարդը</h1>
+          <h1 className="font-heading text-4xl md:text-5xl tracking-wider">Պատվիրեք ձեր զարդատեսակը</h1>
           <OrnamentalDivider className="max-w-xs mx-auto mt-5" />
         </div>
       </div>
@@ -2091,7 +2091,7 @@ function CustomPage() {
           <div>
             <h2 className="font-heading text-2xl tracking-wider mb-5">Ինչպես է ստեղծվում անհատական պատվերը</h2>
             <div className="space-y-4 font-body text-sm text-foreground/70 leading-relaxed mb-8">
-              <p>Յուրաքանչյուր անհատական զարդ սկսվում է ձեր գաղափարից՝ խորհրդանիշ, պատմություն, առիթ կամ մարդ, ում համար ստեղծվում է զարդը։</p>
+              <p>Յուրաքանչյուր անհատական զարդատեսակ սկսվում է ձեր գաղափարից՝ խորհրդանիշ, պատմություն, առիթ կամ մարդ, ում համար ստեղծվում է զարդատեսակը։</p>
               <p>Մենք ձևավորում ենք էսքիզը, ընտրում նյութը և քարերը, հետո սկսում ձեռքի աշխատանքը՝ պահելով ձեզ ընթացքի մեջ։</p>
               <p>Պատրաստման ժամկետը կախված է բարդությունից։ Յուրաքանչյուր անհատական պատվեր ստանում է խնամքով փաթեթավորում և որակի ստուգում։</p>
             </div>
@@ -2173,7 +2173,7 @@ function CustomPage() {
                   </div>
                   <div>
                     <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Նկարագրեք ձեր գաղափարը *</label>
-                    <textarea required value={form.description} onChange={(e) => update("description", e.target.value)} rows={4} placeholder="Գրեք զարդի պատմությունը, առիթը, խորհրդանիշերը կամ ցանկալի զգացողությունը..." className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground resize-none" />
+                    <textarea required value={form.description} onChange={(e) => update("description", e.target.value)} rows={4} placeholder="Գրեք զարդատեսակի պատմությունը, առիթը, խորհրդանիշերը կամ ցանկալի զգացողությունը..." className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground resize-none" />
                   </div>
                   <button type="submit" className="w-full py-3.5 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors mt-2 flex items-center justify-center gap-2">
                     Ուղարկել հայտը
@@ -2270,7 +2270,7 @@ function ContactPage({ shopInfo }: { shopInfo: ShopInfo }) {
                   <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Թեմա</label>
                   <select value={form.subject} onChange={(e) => update("subject", e.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground appearance-none">
                     <option value="">Ընտրել թեման</option>
-                    <option>Զարդի մասին հարց</option>
+                    <option>Զարդատեսակի մասին հարց</option>
                     <option>Անհատական պատվեր</option>
                     <option>Պատվերի կարգավիճակ</option>
                     <option>Փոխանակում</option>
