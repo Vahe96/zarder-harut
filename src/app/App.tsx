@@ -261,6 +261,18 @@ function OrnamentalDivider({ className = "" }: { className?: string }) {
   );
 }
 
+function YoutubeBrandMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 28 20" className={className} aria-hidden="true">
+      <path
+        fill="#ff0000"
+        d="M27.42 3.12A3.52 3.52 0 0 0 24.94.63C22.74 0 14 0 14 0S5.26 0 3.06.63A3.52 3.52 0 0 0 .58 3.12 36.9 36.9 0 0 0 0 10a36.9 36.9 0 0 0 .58 6.88 3.52 3.52 0 0 0 2.48 2.49C5.26 20 14 20 14 20s8.74 0 10.94-.63a3.52 3.52 0 0 0 2.48-2.49A36.9 36.9 0 0 0 28 10a36.9 36.9 0 0 0-.58-6.88Z"
+      />
+      <path fill="#fff" d="m11.2 14.29 7.27-4.29-7.27-4.29v8.58Z" />
+    </svg>
+  );
+}
+
 function PomegranateIcon({ size = 24, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
@@ -1692,8 +1704,8 @@ function ProductDetailPage({
             </div>
           )}
 
-          <div className={`flex flex-col sm:flex-row gap-3 ${product.videoUrl ? "mb-3" : "mb-8"}`}>
-            <div className="flex items-center border border-border w-full sm:w-auto justify-between sm:justify-start">
+          <div className="mb-8 grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)_3.5rem]">
+            <div className="flex h-14 w-full items-center justify-between border border-border sm:w-auto sm:justify-start">
               <button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
                 <Minus size={14} />
               </button>
@@ -1705,32 +1717,29 @@ function ProductDetailPage({
             <button
               onClick={handleAdd}
               disabled={!product.inStock}
-              className="flex-1 py-4 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-14 bg-primary px-5 font-heading text-xs uppercase tracking-[0.25em] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {product.inStock ? "Ավելացնել զամբյուղ" : "Առկա չէ"}
             </button>
             <button
               onClick={() => onToggleWishlist(product.id)}
-              className={`w-full sm:w-14 h-14 border flex items-center justify-center transition-colors ${isWishlisted ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}
+              className={`flex h-14 w-full items-center justify-center border transition-colors ${isWishlisted ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}
               aria-label="Toggle wishlist"
             >
               <Heart size={17} fill={isWishlisted ? "currentColor" : "none"} />
             </button>
-          </div>
-
-          {product.videoUrl && (
-            <div className="mb-8 flex sm:justify-start">
+            {product.videoUrl && (
               <a
                 href={product.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-11 w-full items-center justify-center gap-2.5 border border-foreground/25 bg-background px-5 py-2.5 font-heading text-[10px] uppercase tracking-[0.16em] text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2.5 border border-foreground/25 bg-background px-5 py-2.5 font-heading text-[10px] uppercase tracking-[0.16em] text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:col-start-2 sm:row-start-2"
               >
-                <Youtube className="text-[#ff0000]" size={20} fill="currentColor" strokeWidth={1.7} aria-hidden="true" />
+                <YoutubeBrandMark className="h-4 w-[1.4rem] shrink-0" />
                 Տեսնել տեսանյութը
               </a>
-            </div>
-          )}
+            )}
+          </div>
 
           <div className="grid grid-cols-3 gap-3 py-6 border-y border-border mb-8">
             {[
