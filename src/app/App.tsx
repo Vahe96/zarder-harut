@@ -440,9 +440,9 @@ function CartDrawer({
                 <div className="flex-1 flex flex-col justify-between py-1">
                   <div>
                     <p className="font-heading text-[11px] tracking-wider text-foreground leading-snug">{item.product.name}</p>
-                    <p className="font-body text-[10px] text-muted-foreground mt-0.5">
-                      {item.kind === "collection" ? "Ամբողջ հավաքածու" : item.product.material}
-                    </p>
+                    {item.kind === "collection" && (
+                      <p className="font-body text-[10px] text-muted-foreground mt-0.5">Ամբողջ հավաքածու</p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 border border-border">
@@ -1590,7 +1590,6 @@ function ProductDetailPage({
   }
 
   const images = product.images?.length ? product.images : [product.image];
-  const facts = Object.entries(product.info ?? {}).slice(0, 8);
   const categoryKey = initialProduct?.category || product.category;
   const categoryProducts = products
     .filter((item) => item.id !== product.id && item.category === categoryKey)
@@ -1646,7 +1645,6 @@ function ProductDetailPage({
           </div>
 
           <h1 className="font-heading text-3xl md:text-5xl tracking-wider leading-tight mb-4">{product.name}</h1>
-          <p className="font-body text-sm text-muted-foreground mb-6">{product.material}{product.gemstone ? ` · ${product.gemstone}` : ""}</p>
 
           <div className="flex items-center gap-3 mb-7">
             <span className="font-heading text-2xl text-primary tracking-wide">{formatAmdPrice(product.price)}</span>
@@ -1733,19 +1731,6 @@ function ProductDetailPage({
             ))}
           </div>
 
-          {facts.length > 0 && (
-            <div className="mb-8">
-              <p className="font-heading text-[10px] tracking-[0.25em] uppercase text-foreground mb-4">Մանրամասներ</p>
-              <div className="border border-border">
-                {facts.map(([key, value]) => (
-                  <div key={key} className="flex justify-between gap-4 px-4 py-3 border-b border-border last:border-b-0">
-                    <span className="font-body text-[11px] text-muted-foreground uppercase">{titleCase(key)}</span>
-                    <span className="font-body text-xs text-foreground text-right">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -2834,7 +2819,6 @@ function cartLineToItem(line: CartLine, productById: Map<number, Product>): Cart
       name: line.product.name,
       subtitle: "",
       price: line.product.price,
-      material: "—",
       collection: "",
       collectionIds: [],
       category: "jewellery",
@@ -2872,7 +2856,6 @@ function collectionCartProduct(collection: Collection): Product {
     name: collection.name,
     subtitle: "Ամբողջական հավաքածու",
     price: collection.price,
-    material: "Collection package",
     collection: collection.id,
     collectionIds: [collection.id],
     category: "collection",

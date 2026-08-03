@@ -6,8 +6,6 @@ export interface Product {
   subtitle: string;
   price: number;
   originalPrice?: number;
-  material: string;
-  gemstone?: string;
   collection: string;
   collectionIds: string[];
   category: string;
@@ -25,7 +23,6 @@ export interface Product {
   descriptionHtml?: string;
   colors?: ProductOption[];
   sizes?: ProductOption[];
-  info?: Record<string, string>;
 }
 
 export interface Collection {
@@ -506,7 +503,6 @@ export async function createOrder(
       String(item.product.id),
       {
         name: item.product.name,
-        material: item.product.material,
         ...(item.orderInfo ?? {}),
       },
     ]),
@@ -635,9 +631,8 @@ export function mapBackendProduct(
   product: BackendProduct,
   options: { category?: BackendCategory; topProductIds?: Set<number> } = {},
 ): Product {
-  const info = toRecord(product.info);
   const images = product.media_urls?.filter(Boolean) ?? [];
-  const categoryName = options.category?.name || getInfoValue(info, ["category", "type"]);
+  const categoryName = options.category?.name || "";
   const backendCollections = (product.collections ?? []).filter(
     (collection): collection is { id: number; name?: string | null } => Number.isInteger(collection.id),
   );
@@ -647,7 +642,7 @@ export function mapBackendProduct(
       ? product.collection_ids.filter((id): id is number => Number.isInteger(id)).map((id) => `collection-${id}`)
       : []),
   ]));
-  const collectionName = backendCollections[0]?.name?.trim() || getInfoValue(info, ["collection", "line", "series"]);
+  const collectionName = backendCollections[0]?.name?.trim() || "";
   const listPrice = toNumber(product.price);
   const salePrice = toNumber(product.new_price);
   const hasSale = salePrice > 0 && listPrice > 0 && salePrice < listPrice;
@@ -658,11 +653,9 @@ export function mapBackendProduct(
   return {
     id: product.id,
     name: product.name,
-    subtitle: getInfoValue(info, ["subtitle", "tagline"]) || collectionName || categoryName || "",
+    subtitle: collectionName || categoryName,
     price,
     originalPrice: hasSale ? listPrice : undefined,
-    material: getInfoValue(info, ["material", "metal", "karat"]) || "—",
-    gemstone: getInfoValue(info, ["gemstone", "stone", "gem"]),
     collection: collectionIds[0] || "",
     collectionIds,
     category: slugify(categoryName || "jewellery"),
@@ -680,7 +673,6 @@ export function mapBackendProduct(
     descriptionHtml: product.description_html || undefined,
     colors: normalizeOptions(product.colors),
     sizes: normalizeOptions(product.sizes),
-    info: stringifyRecord(info),
   };
 }
 
@@ -728,27 +720,6 @@ function firstMediaUrl(value: BackendCategory["media_url"]): string | undefined 
   return value || undefined;
 }
 
-function toRecord(value: unknown): Record<string, unknown> {
-  if (value && typeof value === "object" && !Array.isArray(value)) return value as Record<string, unknown>;
-  if (typeof value === "string" && value.trim()) {
-    try {
-      const parsed = JSON.parse(value);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  }
-  return {};
-}
-
-function stringifyRecord(value: Record<string, unknown>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(value)
-      .filter(([, item]) => item !== null && item !== undefined && item !== "")
-      .map(([key, item]) => [key, typeof item === "string" ? item : String(item)]),
-  );
-}
-
 function normalizeOptions(options?: unknown[]): ProductOption[] {
   if (!Array.isArray(options)) return [];
 
@@ -779,15 +750,6 @@ function normalizeBadges(value: unknown): string[] {
 function getOptionString(value: unknown): string | undefined {
   if (typeof value === "string" && value.trim()) return value.trim();
   if (typeof value === "number") return String(value);
-  return undefined;
-}
-
-function getInfoValue(info: Record<string, unknown>, keys: string[]): string | undefined {
-  for (const key of keys) {
-    const value = info[key];
-    if (typeof value === "string" && value.trim()) return value.trim();
-    if (typeof value === "number") return String(value);
-  }
   return undefined;
 }
 
