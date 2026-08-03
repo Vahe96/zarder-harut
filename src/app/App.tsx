@@ -1692,7 +1692,7 @@ function ProductDetailPage({
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <div className={`flex flex-col sm:flex-row gap-3 ${product.videoUrl ? "mb-3" : "mb-8"}`}>
             <div className="flex items-center border border-border w-full sm:w-auto justify-between sm:justify-start">
               <button onClick={() => setQuantity((value) => Math.max(1, value - 1))} className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
                 <Minus size={14} />
@@ -1717,6 +1717,17 @@ function ProductDetailPage({
               <Heart size={17} fill={isWishlisted ? "currentColor" : "none"} />
             </button>
           </div>
+
+          {product.videoUrl && (
+            <a
+              href={product.videoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-8 flex min-h-12 w-full items-center justify-center border border-border px-5 py-3 font-heading text-[10px] uppercase tracking-[0.22em] text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              Տեսնել տեսանյութը
+            </a>
+          )}
 
           <div className="grid grid-cols-3 gap-3 py-6 border-y border-border mb-8">
             {[
