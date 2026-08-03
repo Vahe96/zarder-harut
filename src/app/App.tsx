@@ -22,14 +22,10 @@ interface RouteState {
   productId: number | null;
   collectionId: string | null;
   category: string;
-  returnCollectionId: string | null;
 }
 
 const pageHref = (page: Page) => page === "home" ? "#/" : `#/${page}`;
-const productHref = (id: number, returnCollectionId?: string) => {
-  const query = returnCollectionId ? `?from=${encodeURIComponent(returnCollectionId)}` : "";
-  return `#/product/${id}${query}`;
-};
+const productHref = (id: number) => `#/product/${id}`;
 const collectionHref = (id: string) => `#/collection/${encodeURIComponent(id)}`;
 const categoryHref = (category: string) => `#/shop?category=${encodeURIComponent(category)}`;
 
@@ -52,7 +48,6 @@ function parseHashRoute(hash: string): RouteState {
     productId: null,
     collectionId: null,
     category: "all",
-    returnCollectionId: null,
   };
 
   if (segments.length === 0 || segments[0] === "home") return fallback;
@@ -67,7 +62,7 @@ function parseHashRoute(hash: string): RouteState {
   if (segments[0] === "product") {
     const productId = Number(segments[1]);
     return Number.isInteger(productId) && productId > 0
-      ? { ...fallback, page: "product", productId, returnCollectionId: query.get("from") }
+      ? { ...fallback, page: "product", productId }
       : { ...fallback, page: "shop" };
   }
   if (["about", "custom", "contact"].includes(segments[0])) {
@@ -289,14 +284,12 @@ function ProductCard({
   onToggleWishlist,
   onViewProduct,
   isWishlisted,
-  returnCollectionId,
 }: {
   product: Product;
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
   onViewProduct: (id: number) => void;
   isWishlisted: boolean;
-  returnCollectionId?: string;
 }) {
   const [added, setAdded] = useState(false);
 
@@ -317,7 +310,7 @@ function ProductCard({
     <div className="group relative flex flex-col">
       {/* Image container */}
       <a
-        href={productHref(product.id, returnCollectionId)}
+        href={productHref(product.id)}
         onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
         className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         aria-label={`Դիտել ${product.name}`}
@@ -348,7 +341,7 @@ function ProductCard({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="w-full min-w-0 sm:w-auto">
             <a
-              href={productHref(product.id, returnCollectionId)}
+              href={productHref(product.id)}
               onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
               className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
@@ -1534,8 +1527,6 @@ function ProductDetailPage({
   productId,
   products,
   collections,
-  backHref,
-  onBack,
   onAddToCart,
   onToggleWishlist,
   onViewProduct,
@@ -1545,8 +1536,6 @@ function ProductDetailPage({
   productId: number;
   products: Product[];
   collections: Collection[];
-  backHref: string;
-  onBack: () => void;
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
   onViewProduct: (id: number) => void;
@@ -1612,13 +1601,6 @@ function ProductDetailPage({
       <div className="pt-32 min-h-screen px-6 text-center">
         <ArevakhachSymbol size={36} className="text-primary mx-auto mb-5" />
         <p className="font-heading text-lg tracking-wider mb-4">{message || "Այս զարդը ժամանակավորապես հասանելի չէ։"}</p>
-        <a
-          href={backHref}
-          onClick={(event) => handleInternalLink(event, onBack)}
-          className="inline-block px-7 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase"
-        >
-          Վերադառնալ զարդերին
-        </a>
       </div>
     );
   }
@@ -1642,17 +1624,6 @@ function ProductDetailPage({
 
   return (
     <div className="pt-24 min-h-screen">
-      <div className="px-6 md:px-12 py-5 border-b border-border flex items-center justify-between gap-4">
-        <a
-          href={backHref}
-          onClick={(event) => handleInternalLink(event, onBack)}
-          className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground hover:text-primary transition-colors"
-        >
-          Վերադառնալ զարդերին
-        </a>
-        <p className="font-body text-[10px] tracking-[0.25em] uppercase text-primary">{product.subtitle}</p>
-      </div>
-
       {message && (
         <div className="px-6 md:px-12 py-3 border-b border-border bg-secondary/20 text-center">
           <p className="font-body text-[11px] text-muted-foreground">{message}</p>
@@ -1814,7 +1785,6 @@ function ProductDetailPage({
 function CollectionDetailPage({
   collection,
   products,
-  onBack,
   onAddCollectionToCart,
   onAddToCart,
   onToggleWishlist,
@@ -1823,11 +1793,10 @@ function CollectionDetailPage({
 }: {
   collection: Collection;
   products: Product[];
-  onBack: () => void;
   onAddCollectionToCart: (collection: Collection, products: Product[]) => void;
   onAddToCart: (p: Product, quantity?: number) => void;
   onToggleWishlist: (id: number) => void;
-  onViewProduct: (id: number, returnCollectionId?: string) => void;
+  onViewProduct: (id: number) => void;
   wishlist: number[];
 }) {
   const collectionProducts = useMemo(() => {
@@ -1844,17 +1813,6 @@ function CollectionDetailPage({
 
   return (
     <div className="pt-24 min-h-screen">
-      <div className="px-6 md:px-12 py-5 border-b border-border flex items-center justify-between gap-4">
-        <a
-          href={pageHref("collections")}
-          onClick={(event) => handleInternalLink(event, onBack)}
-          className="font-heading text-[10px] tracking-[0.25em] uppercase text-muted-foreground hover:text-primary transition-colors"
-        >
-          Վերադառնալ հավաքածուներին
-        </a>
-        <p className="font-body text-[10px] tracking-[0.25em] uppercase text-primary">{collection.count} զարդ</p>
-      </div>
-
       <section className="px-6 md:px-12 py-10 md:py-16 grid lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] gap-10 md:gap-14 border-b border-border">
         <div className="relative overflow-hidden bg-secondary aspect-[4/3] lg:aspect-[5/4]">
           <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
@@ -1920,9 +1878,8 @@ function CollectionDetailPage({
                 product={product}
                 onAddToCart={onAddToCart}
                 onToggleWishlist={onToggleWishlist}
-                onViewProduct={(id) => onViewProduct(id, collection.id)}
+                onViewProduct={onViewProduct}
                 isWishlisted={wishlist.includes(product.id)}
-                returnCollectionId={collection.id}
               />
             ))}
           </div>
@@ -3016,7 +2973,6 @@ export default function App() {
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(initialRoute.productId);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(initialRoute.collectionId);
-  const [productReturnCollectionId, setProductReturnCollectionId] = useState<string | null>(initialRoute.returnCollectionId);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogMessage, setCatalogMessage] = useState("");
   const [collectionsMessage, setCollectionsMessage] = useState("");
@@ -3052,7 +3008,6 @@ export default function App() {
     setShopCategory(route.category);
     setSelectedProductId(route.productId);
     setSelectedCollectionId(route.collectionId);
-    setProductReturnCollectionId(route.returnCollectionId);
     setMobileOpen(false);
 
     if (route.page === "about") {
@@ -3209,8 +3164,8 @@ export default function App() {
     openRoute(categoryHref(category));
   };
 
-  const viewProduct = (id: number, returnCollectionId?: string) => {
-    openRoute(productHref(id, returnCollectionId));
+  const viewProduct = (id: number) => {
+    openRoute(productHref(id));
   };
 
   const viewCollection = (id: string) => {
@@ -3507,8 +3462,6 @@ export default function App() {
             productId={selectedProductId}
             products={products}
             collections={collections}
-            backHref={productReturnCollectionId ? collectionHref(productReturnCollectionId) : pageHref("shop")}
-            onBack={() => productReturnCollectionId ? viewCollection(productReturnCollectionId) : navigate("shop")}
             onAddToCart={addToCart}
             onToggleWishlist={toggleWishlist}
             onViewProduct={viewProduct}
@@ -3530,7 +3483,6 @@ export default function App() {
           <CollectionDetailPage
             collection={selectedCollection}
             products={products}
-            onBack={() => navigate("collections")}
             onAddCollectionToCart={addCollectionToCart}
             onAddToCart={addToCart}
             onToggleWishlist={toggleWishlist}
