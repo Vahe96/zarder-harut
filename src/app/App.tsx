@@ -279,12 +279,12 @@ function ProductCard({
       {/* Info */}
       <div className="pt-4 pb-2">
         <p className="font-body text-[10px] tracking-[0.18em] text-muted-foreground uppercase mb-1">{product.subtitle}</p>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="w-full min-w-0 sm:w-auto">
             <h3 className="font-heading text-sm tracking-wide text-foreground leading-snug mb-2 transition-colors group-hover:text-primary">
               {product.name}
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="font-heading text-primary text-sm tracking-wide">{formatAmdPrice(product.price)}</span>
               {product.originalPrice && (
                 <span className="font-body text-muted-foreground text-xs line-through">{formatAmdPrice(product.originalPrice)}</span>
@@ -446,21 +446,21 @@ function Nav({
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm transition-all duration-400 ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.18)]" : ""}`}>
-      <div className="grid grid-cols-[1fr_auto] md:grid-cols-[260px_1fr_260px] items-center gap-4 px-5 md:px-12 py-2.5 md:py-3">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 lg:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] lg:px-8 lg:py-3 xl:px-12">
         {/* Logo */}
-        <button onClick={() => onNavigate("home")} className="flex items-center justify-start group" aria-label="Դրախտ գլխավոր էջ">
+        <button onClick={() => onNavigate("home")} className="group flex min-w-0 items-center justify-start overflow-hidden" aria-label="Դրախտ գլխավոր էջ">
           <picture>
             <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.logoMobile} />
             <img
               src={DRAKHT_ASSETS.logoWeb}
               alt="Դրախտ"
-              className={`h-[34px] w-auto max-w-[210px] object-contain opacity-90 transition-all group-hover:opacity-100 md:h-[28px] ${themeMode === "light" ? "invert" : ""}`}
+              className={`h-8 w-auto max-w-[100px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:max-w-[180px] lg:h-7 lg:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
             />
           </picture>
         </button>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-8">
+        <nav className="hidden items-center justify-center gap-4 whitespace-nowrap lg:flex xl:gap-8">
           {navLinks.map(({ label, page }) => (
             <button
               key={page}
@@ -474,11 +474,11 @@ function Nav({
         </nav>
 
         {/* Right icons */}
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-2 sm:gap-4">
           <button onClick={onThemeToggle} className="grid h-8 w-8 place-items-center border border-border text-foreground/65 transition-colors hover:border-primary hover:text-primary" aria-label={themeMode === "dark" ? "Միացնել բաց ռեժիմը" : "Միացնել մուգ ռեժիմը"} title={themeMode === "dark" ? "Բաց ռեժիմ" : "Մուգ ռեժիմ"}>
             {themeMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
-          <button onClick={() => onNavigate("shop")} className="hidden md:flex text-foreground/65 hover:text-foreground transition-colors" aria-label="Որոնում">
+          <button onClick={() => onNavigate("shop")} className="hidden text-foreground/65 transition-colors hover:text-foreground lg:flex" aria-label="Որոնում">
             <Search size={17} />
           </button>
           <button className="relative text-foreground/65 hover:text-foreground transition-colors" aria-label="Նախընտրածներ">
@@ -499,14 +499,14 @@ function Nav({
               <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-primary text-primary-foreground text-[8px] font-heading rounded-full flex items-center justify-center">{cartCount}</span>
             )}
           </button>
-          <button className="md:hidden text-foreground/70 hover:text-foreground transition-colors" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Մենյու">
+          <button className="text-foreground/70 transition-colors hover:text-foreground lg:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Մենյու">
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden border-t border-border transition-all duration-300 overflow-hidden ${mobileOpen ? "max-h-80" : "max-h-0"}`}>
+      <div className={`overflow-hidden border-t border-border transition-all duration-300 lg:hidden ${mobileOpen ? "max-h-80" : "max-h-0"}`}>
         <nav className="flex flex-col px-6 py-4 gap-4 bg-background/98">
           {navLinks.map(({ label, page }) => (
             <button
@@ -536,7 +536,7 @@ function HeroSection({ onNavigate }: { onNavigate: (p: Page) => void }) {
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 100); return () => clearTimeout(t); }, []);
 
   return (
-    <section className="relative w-full min-h-[720px] overflow-hidden border-b border-white/15 bg-black md:min-h-[calc(100vh-54px)]">
+    <section className="relative h-[calc(100svh-54px)] min-h-[540px] w-full overflow-hidden border-b border-white/15 bg-black md:h-auto md:min-h-[calc(100vh-54px)]">
       <picture className="absolute inset-0">
         <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.heroMobile} />
         <img
@@ -1066,18 +1066,18 @@ function NewsletterSection() {
             <span className="font-heading text-xs tracking-[0.2em] uppercase">Շնորհակալություն միանալու համար</span>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex gap-0">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:gap-0">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ձեր էլ․ հասցեն"
               required
-              className="flex-1 bg-input-background border border-border px-5 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              className="w-full min-w-0 flex-1 bg-input-background border border-border px-5 py-3.5 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
             />
             <button
               type="submit"
-              className="px-6 py-3.5 bg-primary text-primary-foreground font-heading text-xs tracking-[0.2em] uppercase hover:bg-primary/90 transition-colors flex-shrink-0"
+              className="w-full flex-shrink-0 bg-primary px-6 py-3.5 font-heading text-xs uppercase tracking-[0.2em] text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
             >
               Բաժանորդագրվել
             </button>
@@ -1151,7 +1151,7 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
         <p className="font-body text-[10px] text-muted-foreground">
           © 2026 Դրախտ։ Բոլոր իրավունքները պաշտպանված են։
         </p>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center md:justify-end">
           {["Գաղտնիության քաղաքականություն", "Օգտագործման պայմաններ", "Cookie քաղաքականություն"].map((t) => (
             <a key={t} href="#" className="font-body text-[10px] text-muted-foreground hover:text-primary transition-colors">{t}</a>
           ))}
@@ -1338,7 +1338,7 @@ function ShopPage({
 
       <div className="flex">
         {/* Sidebar — desktop */}
-        <aside className="hidden md:block w-56 flex-shrink-0 border-r border-border px-6 py-8 sticky top-24 self-start max-h-[calc(100vh-6rem)] overflow-y-auto">
+        <aside className="sticky top-24 hidden max-h-[calc(100vh-6rem)] w-56 flex-shrink-0 self-start overflow-y-auto border-r border-border px-6 py-8 lg:block">
           <FilterPanel />
         </aside>
 
@@ -1360,7 +1360,7 @@ function ShopPage({
 
             {/* Mobile filter toggle */}
             <button
-              className="md:hidden flex items-center gap-2 border border-border px-3 py-2.5 font-heading text-[10px] tracking-[0.15em] uppercase text-muted-foreground hover:border-primary hover:text-primary transition-all"
+              className="flex items-center gap-2 border border-border px-3 py-2.5 font-heading text-[10px] uppercase tracking-[0.15em] text-muted-foreground transition-all hover:border-primary hover:text-primary lg:hidden"
               onClick={() => setSidebarOpen(!sidebarOpen)}
             >
               <ListFilter size={12} /> Ֆիլտրեր
@@ -1399,7 +1399,7 @@ function ShopPage({
 
           {/* Mobile filter panel */}
           {sidebarOpen && (
-            <div className="md:hidden mb-8 p-5 border border-border bg-secondary/30">
+            <div className="mb-8 border border-border bg-secondary/30 p-5 lg:hidden">
               <FilterPanel />
             </div>
           )}
@@ -1410,7 +1410,7 @@ function ShopPage({
               <p className="font-heading text-sm tracking-wider text-muted-foreground">Ձեր ընտրությանը համապատասխան զարդեր չկան։</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-10">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3">
               {filtered.map((p) => (
                 <ProductCard
                   key={p.id}
@@ -2076,7 +2076,7 @@ function CustomPage() {
               <>
                 <h3 className="font-heading text-sm tracking-[0.2em] uppercase mb-6">Պատվերի հայտ</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
                       <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Անուն ազգանուն *</label>
                       <input required value={form.name} onChange={(e) => update("name", e.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
@@ -2198,7 +2198,7 @@ function ContactPage({ shopInfo }: { shopInfo: ShopInfo }) {
             <>
               <h3 className="font-heading text-sm tracking-[0.2em] uppercase mb-6">Ուղարկել հաղորդագրություն</h3>
               <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Անուն *</label>
                     <input required value={form.name} onChange={(e) => update("name", e.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
@@ -2308,9 +2308,9 @@ function AuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-3 sm:px-4 sm:py-8">
       <button className="absolute inset-0 bg-black/75" onClick={onClose} aria-label="Փակել մուտքը" />
-      <div className="relative w-full max-w-md bg-card border border-border p-7 shadow-2xl">
+      <div className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto border border-border bg-card p-5 shadow-2xl sm:max-h-[90vh] sm:p-7">
         <button onClick={onClose} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors" aria-label="Փակել">
           <X size={18} />
         </button>
@@ -2335,7 +2335,7 @@ function AuthModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isRegister && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Անուն</label>
                 <input required value={form.firstName} onChange={(event) => update("firstName", event.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
@@ -2451,9 +2451,9 @@ function AccountModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-3 sm:px-4 sm:py-8">
       <button className="absolute inset-0 bg-black/75" onClick={onClose} aria-label="Փակել հաշիվը" />
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-card border border-border shadow-2xl">
+      <div className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl overflow-y-auto border border-border bg-card shadow-2xl sm:max-h-[90vh]">
         <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-6 py-5 border-b border-border bg-card">
           <div>
             <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-1">Անձնական էջ</p>
@@ -2478,7 +2478,7 @@ function AccountModal({
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Անուն</label>
                   <input required value={form.first_name} onChange={(event) => update("first_name", event.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
@@ -2651,9 +2651,9 @@ function CheckoutModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-3 sm:px-4 sm:py-8">
       <button className="absolute inset-0 bg-black/75" onClick={onClose} aria-label="Փակել պատվերը" />
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-card border border-border shadow-2xl">
+      <div className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl overflow-y-auto border border-border bg-card shadow-2xl sm:max-h-[90vh]">
         <div className="flex items-center justify-between gap-4 px-6 py-5 border-b border-border">
           <div>
             <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-1">Անվտանգ պատվեր</p>
