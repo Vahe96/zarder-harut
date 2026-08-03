@@ -1719,15 +1719,17 @@ function ProductDetailPage({
           </div>
 
           {product.videoUrl && (
-            <a
-              href={product.videoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mb-8 flex min-h-14 w-full items-center justify-center gap-3 border border-[#ff0000] bg-[#ff0000] px-5 py-3 font-heading text-[11px] uppercase tracking-[0.2em] text-white shadow-sm transition-colors hover:border-[#d90000] hover:bg-[#d90000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff0000]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <Youtube size={21} fill="currentColor" strokeWidth={1.8} aria-hidden="true" />
-              Տեսնել տեսանյութը
-            </a>
+            <div className="mb-8 flex sm:justify-start">
+              <a
+                href={product.videoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex min-h-11 w-full items-center justify-center gap-2.5 border border-foreground/25 bg-background px-5 py-2.5 font-heading text-[10px] uppercase tracking-[0.16em] text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:w-auto"
+              >
+                <Youtube className="text-[#ff0000]" size={20} fill="currentColor" strokeWidth={1.7} aria-hidden="true" />
+                Տեսնել տեսանյութը
+              </a>
+            </div>
           )}
 
           <div className="grid grid-cols-3 gap-3 py-6 border-y border-border mb-8">
