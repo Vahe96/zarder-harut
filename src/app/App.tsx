@@ -92,6 +92,8 @@ const DRAKHT_ASSETS = {
   logoMobile: `${PUBLIC_BASE}drakht/logo-mobile.png`,
   heroWeb: `${PUBLIC_BASE}drakht/hero-web.png`,
   heroMobile: `${PUBLIC_BASE}drakht/hero-mobile.png`,
+  heroWebLight: `${PUBLIC_BASE}drakht/hero-web-light.png`,
+  heroMobileLight: `${PUBLIC_BASE}drakht/hero-mobile-light.png`,
   birdsLineWeb: `${PUBLIC_BASE}drakht/birds-line-web.png`,
   birdsLineMobile: `${PUBLIC_BASE}drakht/birds-line-mobile.png`,
   bird: `${PUBLIC_BASE}drakht/bird.png`,
@@ -638,42 +640,50 @@ function Nav({
 
 // ─── HERO SECTION ─────────────────────────────────────────────────────────────
 
-function HeroSection({ onNavigate }: { onNavigate: (p: Page) => void }) {
+function HeroSection({ onNavigate, themeMode }: { onNavigate: (p: Page) => void; themeMode: ThemeMode }) {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 100); return () => clearTimeout(t); }, []);
 
   return (
-    <section className="relative h-[calc(100svh-54px)] min-h-[540px] w-full overflow-hidden border-b border-white/15 bg-black md:h-auto md:min-h-[calc(100vh-54px)]">
-      <picture className="absolute inset-0">
+    <section className={`relative h-[calc(100svh-54px)] min-h-[540px] w-full overflow-hidden border-b border-border md:h-auto md:min-h-[calc(100vh-54px)] ${themeMode === "dark" ? "bg-black" : "bg-white"}`}>
+      <picture className={`absolute inset-0 ${themeMode === "dark" ? "block" : "hidden"}`}>
         <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.heroMobile} />
         <img
           src={DRAKHT_ASSETS.heroWeb}
-          alt="Դրախտը՝ հայկական զարդատեսակների գլխավոր էջ"
+          alt="Դրախտը՝ հայկական զարդատեսակների գլխավոր էջ, մուգ տարբերակ"
           className="h-full w-full object-cover object-center opacity-95"
         />
       </picture>
+      <picture className={`absolute inset-0 ${themeMode === "light" ? "block" : "hidden"}`}>
+        <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.heroMobileLight} />
+        <img
+          src={DRAKHT_ASSETS.heroWebLight}
+          alt="Դրախտը՝ հայկական զարդատեսակների գլխավոր էջ, բաց տարբերակ"
+          className="h-full w-full object-cover object-center"
+        />
+      </picture>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_32%,rgba(255,255,255,0.08),transparent_26%),linear-gradient(90deg,rgba(0,0,0,0.26),transparent_50%,rgba(0,0,0,0.18))]" />
+      {themeMode === "dark" && <div className="absolute inset-0 bg-[radial-gradient(circle_at_24%_32%,rgba(255,255,255,0.05),transparent_26%)]" />}
 
       {/* Actions are live HTML over the supplied Drakht hero artwork. */}
-      <div className="absolute left-[7.5%] bottom-[11%] z-10 md:bottom-[11.5%]">
+      <div className="absolute left-[19%] top-[54%] z-10 w-[52vw] max-w-[260px] md:left-[10.5%] md:top-auto md:bottom-[20%] md:w-auto md:max-w-none">
         <div
           className="transition-all duration-1000"
           style={{ opacity: loaded ? 1 : 0, transform: loaded ? "translateY(0)" : "translateY(24px)" }}
         >
-          <div className="flex flex-wrap gap-2.5 md:gap-3">
+          <div className="flex flex-col gap-2.5 md:flex-row md:flex-wrap md:gap-3">
             <a
               href={pageHref("shop")}
               onClick={(event) => handleInternalLink(event, () => onNavigate("shop"))}
-              className="group border border-white bg-white px-4 py-2.5 font-heading text-[11px] tracking-[0.04em] text-black transition-all hover:bg-white/85 md:px-5 md:py-3"
+              className={`group px-3 py-2.5 text-center font-heading text-[10px] tracking-[0.02em] transition-all md:px-5 md:py-3 md:text-[11px] ${themeMode === "dark" ? "border border-white bg-white text-black hover:bg-white/85" : "border border-black bg-black text-white hover:bg-black/80"}`}
             >
               Տեսականի / Հավաքածուներ
-              <ArrowRight size={13} className="ml-2 inline-block align-[-2px] transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={13} className="ml-2 hidden align-[-2px] transition-transform group-hover:translate-x-1 md:inline-block" />
             </a>
             <a
               href={pageHref("custom")}
               onClick={(event) => handleInternalLink(event, () => onNavigate("custom"))}
-              className="border border-white/35 bg-black/25 px-4 py-2.5 font-heading text-[11px] tracking-[0.04em] text-white transition-all hover:border-white hover:bg-white hover:text-black md:px-5 md:py-3"
+              className={`border px-3 py-2.5 text-center font-heading text-[10px] tracking-[0.02em] transition-all md:px-5 md:py-3 md:text-[11px] ${themeMode === "dark" ? "border-white/35 bg-black/25 text-white hover:border-white hover:bg-white hover:text-black" : "border-black/25 bg-white/25 text-black hover:border-black hover:bg-black hover:text-white"}`}
             >
               Անհատական պատվերներ
             </a>
@@ -1262,7 +1272,7 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
 // ─── HOME PAGE ────────────────────────────────────────────────────────────────
 
 function HomePage({
-  onNavigate, onViewCategory, onViewCollection, products, collections, isLoading, catalogMessage, onRetry,
+  onNavigate, onViewCategory, onViewCollection, products, collections, isLoading, catalogMessage, onRetry, themeMode,
 }: {
   onNavigate: (p: Page) => void;
   onViewCategory: (category: string) => void;
@@ -1272,10 +1282,11 @@ function HomePage({
   isLoading: boolean;
   catalogMessage: string;
   onRetry: () => void;
+  themeMode: ThemeMode;
 }) {
   return (
     <>
-      <HeroSection onNavigate={onNavigate} />
+      <HeroSection onNavigate={onNavigate} themeMode={themeMode} />
       <CollectionsPreview onNavigate={onNavigate} onViewCollection={onViewCollection} collections={collections} />
       {isLoading && (
         <div className="px-6 md:px-12 py-4 border-y border-border bg-secondary/20 text-center">
@@ -3338,6 +3349,7 @@ export default function App() {
             isLoading={catalogLoading}
             catalogMessage={catalogMessage}
             onRetry={() => setCatalogReloadKey((value) => value + 1)}
+            themeMode={themeMode}
           />
         )}
         {page === "shop" && (
