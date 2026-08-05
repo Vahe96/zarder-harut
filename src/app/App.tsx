@@ -94,6 +94,9 @@ const DRAKHT_ASSETS = {
   heroMobile: `${PUBLIC_BASE}drakht/hero-mobile.png`,
   birdsLineWeb: `${PUBLIC_BASE}drakht/birds-line-web.png`,
   birdsLineMobile: `${PUBLIC_BASE}drakht/birds-line-mobile.png`,
+  bird: `${PUBLIC_BASE}drakht/bird.png`,
+  pomegranates: `${PUBLIC_BASE}drakht/pomegranates.png`,
+  customOrder: `${PUBLIC_BASE}drakht/custom-order.png`,
 };
 const WISHLIST_STORAGE_KEY = "zarder.shop.wishlist";
 
@@ -216,12 +219,24 @@ const DEFAULT_SHOP_INFO: ShopInfo = {
 };
 
 const REVIEWS = [
-  { name: "Anahit Vardanyan", location: "Yerevan, Armenia", rating: 5, text: "I ordered the Ararat ring as an anniversary gift. The quality is extraordinary — it looks even more beautiful in person than in the photographs. Areni truly captures the spirit of Armenia in every piece.", product: "Ararat Sovereign Ring" },
-  { name: "Sarah Mkrtchyan", location: "Los Angeles, USA", rating: 5, text: "As an Armenian-American, wearing my Khachkar pendant connects me to my heritage in a way that feels both modern and profoundly meaningful. The craftsmanship is impeccable — rivalling anything I have seen from European houses.", product: "Khachkar Cross Pendant" },
-  { name: "Hayk Torossian", location: "Paris, France", rating: 5, text: "The packaging alone was a luxury experience. Inside was the most delicate pomegranate bracelet I have ever seen. When my wife opened it she wept. This is exactly what Armenian jewellery should feel like to the world.", product: "Pomegranate Bloom Bracelet" },
-  { name: "Emma Kazarian", location: "London, UK", rating: 5, text: "I commissioned a custom piece with my grandmother's name in Armenian script. The process was seamless — they kept me informed at every stage — and the result is a true family heirloom. Beyond five stars.", product: "Custom Alphabet Pendant" },
-  { name: "Nare Avetisyan", location: "Beirut, Lebanon", rating: 5, text: "Areni is what Armenian jewellery should look like internationally. Uncompromising quality. At the launch event in Dubai, every guest asked where my earrings were from. Pure pride.", product: "Pomegranate Drop Earrings" },
-  { name: "David Lalayan", location: "Sydney, Australia", rating: 5, text: "The bridal set arrived six weeks before our wedding. My fiancée has not taken it off since opening the box. Every compliment at the reception was directed at her ring. Thank you, Areni.", product: "Ararat Bridal Set" },
+  {
+    name: "Նանար Ավետիսյան",
+    rating: 5,
+    text: "Մեր ինքնությունը չմոռանալու համար նմանատիպ նախագծեր հարկավոր և անհրաժեշտ են։ Շնորհակալ եմ Հայրենիքի համար արված անգնահատելի աշխատանքի, արծաթյա զարդերի, որոնք ջերմություն են հաղորդում և մեզ կրթելու համար։",
+    product: "«Հավուն» հավաքածու",
+  },
+  {
+    name: "Գոռ Աղոյան",
+    rating: 5,
+    text: "Բարև Ձեզ։ Կարող եմ արդյո՞ք առաջարկություն անել։ Եթե այո, ապա ինչպե՞ս։ Մեկ խոսք կասեմ՝ հիացած եմ։",
+    product: "«Հավասարաթև Խաչ» կախազարդ",
+  },
+  {
+    name: "Գաբրիել Սողոյան",
+    rating: 5,
+    text: "Ցանկանում եմ անպայման կիսվել իմ և մտերիմներիս կարծիքներով։ Հարազատներիցս մեկի հարսանյաց արարողությանը նվիրեցի «Հավուն» հավաքածուն և պատմեցի հայկական հավքի խորհուրդն ու իմաստը։ Հավատացեք՝ արծաթը ստվերեց ոսկու փայլը․ բոլորը հուզված էին և հպարտ՝ հայ լինելու փաստով։ Օրհնվե՛ք և Դուք։",
+    product: "«Հավուն» հավաքածու",
+  },
 ];
 
 // ─── DECORATIVE SVG COMPONENTS ────────────────────────────────────────────────
@@ -248,17 +263,20 @@ function ArevakhachSymbol({ size = 40, className = "" }: { size?: number; classN
 
 function OrnamentalDivider({ className = "" }: { className?: string }) {
   return (
-    <div className={`drakht-divider ${className}`} aria-hidden="true">
-      <picture>
-        <source media="(max-width: 767px)" srcSet={DRAKHT_ASSETS.birdsLineMobile} />
-        <img
-          src={DRAKHT_ASSETS.birdsLineWeb}
-          alt=""
-          className="mx-auto h-8 w-full object-contain opacity-75 md:h-9"
-        />
-      </picture>
+    <div className={`drakht-divider flex items-center justify-center gap-2 text-foreground/45 ${className}`} aria-hidden="true">
+      <span className="h-px min-w-5 flex-1 bg-current" />
+      <BirdMark className="h-12 w-16 md:h-14 md:w-20" />
+      <span className="h-px min-w-5 flex-1 bg-current" />
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
+      <span className="h-px min-w-5 flex-1 bg-current" />
+      <BirdMark className="h-12 w-16 -scale-x-100 md:h-14 md:w-20" />
+      <span className="h-px min-w-5 flex-1 bg-current" />
     </div>
   );
+}
+
+function BirdMark({ className = "" }: { className?: string }) {
+  return <img src={DRAKHT_ASSETS.bird} alt="" className={`shrink-0 object-contain invert dark:invert-0 ${className}`} aria-hidden="true" />;
 }
 
 function YoutubeBrandMark({ className = "" }: { className?: string }) {
@@ -325,7 +343,7 @@ function ProductCard({
         href={productHref(product.id)}
         onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
         className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        aria-label={`Դիտել ${product.name}`}
+        aria-label={`Տեսնել ${product.name}`}
       >
         <div className="relative overflow-hidden bg-secondary aspect-[4/5]">
           <img
@@ -707,7 +725,7 @@ function CollectionsPreview({
                 <p className="mt-1 font-heading text-xs tracking-wide text-primary">{formatAmdPrice(col.price)}</p>
                 {i === 0 && <p className="font-body text-xs text-white/60 mt-1.5 leading-relaxed hidden md:block">{col.tagline}</p>}
                 <div className="mt-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span className="font-heading text-[10px] tracking-[0.2em] text-primary uppercase">Դիտել</span>
+                  <span className="font-heading text-[10px] tracking-[0.2em] text-primary uppercase">Տեսնել</span>
                   <ArrowRight size={11} className="text-primary" />
                 </div>
               </div>
@@ -722,7 +740,7 @@ function CollectionsPreview({
           onClick={(event) => handleInternalLink(event, () => onNavigate("collections"))}
           className="font-heading text-[11px] tracking-[0.25em] uppercase text-primary border-b border-primary/40 pb-0.5 hover:border-primary transition-colors"
         >
-          Դիտել բոլոր հավաքածուները
+          Տեսնել բոլոր հավաքածուները
         </a>
       </div>
     </section>
@@ -804,7 +822,7 @@ function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (categ
                 <p className="mb-2 font-body text-[9px] tracking-[0.28em] uppercase text-primary/85">{category.count} ապրանք</p>
                 <h3 className="font-heading text-xl tracking-wide text-white">{category.name}</h3>
                 <div className="mt-4 inline-flex items-center gap-2 font-heading text-[10px] tracking-[0.22em] uppercase text-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  Դիտել
+                  Տեսնել
                   <ArrowRight size={12} />
                 </div>
               </div>
@@ -928,49 +946,25 @@ function ProductCategorySlider({
 
 function HeritageBanner({ onNavigate }: { onNavigate: (p: Page) => void }) {
   return (
-    <section className="relative mb-16 flex min-h-[480px] items-center overflow-hidden md:mb-24">
+    <section className="relative mb-16 flex min-h-[440px] items-center overflow-hidden md:mb-24 md:min-h-[500px]">
       <img
-        src="https://images.unsplash.com/photo-1529224677962-8f4c65e152fa?w=1600&h=900&fit=crop&auto=format"
-        alt="Pomegranates — symbol of Armenian abundance"
-        className="absolute inset-0 w-full h-full object-cover"
+        src={DRAKHT_ASSETS.pomegranates}
+        alt="Հարատև կյանքի մշակույթը ներկայացնող հայկական խորհրդանիշներ"
+        className="absolute inset-0 h-full w-full object-cover object-right"
       />
-      <div className="absolute inset-0 bg-background/85" />
-      {/* Decorative pattern */}
-      <div className="absolute inset-0 opacity-4">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <ArevakhachSymbol size={400} className="text-primary" />
-        </div>
-      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,#000_0%,#000_46%,rgba(0,0,0,0.72)_64%,rgba(0,0,0,0.16)_100%)]" />
 
-      <div className="relative z-10 px-6 md:px-16 py-16 max-w-3xl">
+      <div className="relative z-10 max-w-4xl px-6 py-16 text-white md:px-16">
         <div className="flex items-center gap-3 mb-6">
-          <PomegranateIcon size={20} className="text-primary" />
-          <span className="font-body text-[10px] tracking-[0.35em] text-primary uppercase">Հայկական ժառանգության հավաքածու</span>
+          <BirdMark className="h-11 w-14 !invert-0" />
+          <span className="font-body text-[10px] tracking-[0.32em] text-white/80 uppercase">Դարավոր «Բանի» իմաստը</span>
         </div>
-        <h2 className="font-heading text-3xl md:text-5xl tracking-wider text-foreground leading-snug mb-6">
-          3000 տարվա<br />զարդարվեստը<br />
-          <span className="text-primary">այսօրվա մեջ</span>
+        <h2 className="mb-6 max-w-3xl font-heading text-3xl leading-snug tracking-wide md:text-5xl">
+          Հարատև կյանքի մշակույթ և արվեստ՝<br />Հայկականություն
         </h2>
-        <p className="font-body text-sm md:text-base text-foreground/65 leading-relaxed mb-8 font-light max-w-xl">
-          Հայկական զարդարվեստի հնագույն նախշերը մենք վերածում ենք ժամանակակից արծաթյա զարդատեսակների՝ պահպանելով ձևի նրբությունը, խորհրդանիշի ուժը և ձեռքի աշխատանքի արժեքը։
+        <p className="max-w-2xl font-body text-sm font-light leading-relaxed text-white/85 md:text-base">
+          Հայկական ամբողջ պատմությունն ու մշակույթը՝ կյանքի, շարունակականության, հարատևման, բարեկեցության, վերածննդի, մարդասիրության և գիտելիքի մասին է, ինչն արտահայտված է նաև մեր «Դրախտը» զարդանախշերում։
         </p>
-        <div className="flex flex-wrap gap-4">
-          <a
-            href={pageHref("collections")}
-            onClick={(event) => handleInternalLink(event, () => onNavigate("collections"))}
-            className="group px-7 py-3 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase flex items-center gap-3 hover:bg-primary/90 transition-all"
-          >
-            Դիտել հավաքածուները
-            <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-          </a>
-          <a
-            href={pageHref("about")}
-            onClick={(event) => handleInternalLink(event, () => onNavigate("about"))}
-            className="px-7 py-3 border border-foreground/25 text-foreground/80 font-heading text-xs tracking-[0.2em] uppercase hover:border-primary hover:text-primary transition-all"
-          >
-            Մեր մասին
-          </a>
-        </div>
       </div>
     </section>
   );
@@ -998,23 +992,21 @@ function BrandStorySection() {
       <div className="flex flex-col justify-center px-8 md:px-14 py-16 bg-secondary/20">
         <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-4">Մեր մասին</p>
         <h2 className="font-heading text-2xl md:text-3xl tracking-wider mb-6 leading-snug">
-          Ծնված Երևանում։<br />Սիրված ամբողջ աշխարհում։
+          «Մեր Սար ու Ձորերի» մասին․<br />մեր ընկերության առանձնահատկության մասին
         </h2>
         <OrnamentalDivider className="max-w-48 mb-7" />
         <div className="space-y-4 font-body text-sm text-foreground/70 leading-relaxed font-light">
-          <p>«Դրախտը» հայկական զարդատեսակների բրենդ է, որտեղ արծաթը, ձեռքի աշխատանքը և հայկական խորհրդանշանները միավորվում են ժամանակակից նրբագեղության մեջ։ Մեր զարդատեսակները ստեղծվում են այն մարդկանց համար, ովքեր ուզում են կրել ոչ միայն գեղեցիկ իր, այլ նաև հիշողություն, ինքնություն և պատմություն։</p>
-          <p>Յուրաքանչյուր զարդատեսակ ծնվում է մանրակրկիտ աշխատանքի արդյունքում՝ էսքիզից մինչև վերջնական փայլեցում։ Մենք կարևորում ենք մաքուր ձևերը, հարմար կրելը, որակյալ քարերի ընտրությունը և այնպիսի դիզայնը, որը կարող է ապրել ամենօրյա կերպարում ու մնալ արժեքավոր տարիների ընթացքում։</p>
-          <p>Մեր ոգեշնչումը հայկական զարդարվեստն է՝ նռան, Արարատի, արևախաչի, տառերի և հնագույն նախշերի լեզուն։ Այդ ժառանգությունը մենք ներկայացնում ենք զուսպ, ժամանակակից և կրելի ձևով։</p>
+          <p>«Դրախտը» հայկականության գողտրիկ անկյուն է, որտեղ պատմությունը խորհրդանիշների տեսքով արտահայտված է արծաթյա զարդանախշերում։ Ամեն մի զարդանախշ առաջին հերթին խորհրդանիշ է, ակնարկ, ասելիք, իմաստ, հաղորդություն։</p>
+          <p>Մեր հարթակում չկա որևէ գործ, որը զուրկ է բովանդակությունից և կրում է միայն գեղեցիկի ու նրբագեղության կարգախոսը։ Մենք մշտապես փնտրում ենք իմաստն ու ճշմարտությունը՝ «Բանը»։</p>
+          <p>Յուրաքանչյուր զարդատեսակ աշխարհ ի հայտ գալուց առաջ մենք խորապես ուսումնասիրում ենք տվյալ խորհրդանիշի իմաստը՝ Ձեզ փոխանցելու համար համամարդկային արժեք պարունակող խորիմաստությունները։</p>
         </div>
         <div className="mt-8 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-muted overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/60 flex items-center justify-center">
-              <span className="font-display text-primary text-xs">Դ</span>
-            </div>
+          <div className="w-12 h-12 rounded-full bg-[#b52025] overflow-hidden flex items-center justify-center">
+            <BirdMark className="h-10 w-10 !invert-0" />
           </div>
           <div>
             <p className="font-heading text-sm tracking-wide text-foreground">Դրախտը</p>
-            <p className="font-body text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Հայկական արծաթյա զարդատեսակներ</p>
+            <p className="font-body text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Դարավոր «Բանի» իմաստը</p>
           </div>
         </div>
       </div>
@@ -1059,9 +1051,9 @@ function ReviewsSection() {
   return (
     <section className="px-6 md:px-12 py-20 md:py-28">
       <div className="text-center mb-14">
-        <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Հաճախորդների կարծիքներ</p>
-        <h2 className="font-heading text-3xl md:text-4xl tracking-wider">Մեզ վստահողների խոսքերը</h2>
-        <OrnamentalDivider className="max-w-xs mx-auto mt-5" />
+        <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Դրախտի մասին</p>
+        <h2 className="font-heading text-3xl md:text-4xl tracking-wider">Մեր այցելուների մտքերն ու կարծիքները</h2>
+        <OrnamentalDivider className="mx-auto mt-5 w-[min(88vw,560px)]" />
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -1082,7 +1074,6 @@ function ReviewsSection() {
             <div className="border-t border-border/40 pt-4 flex items-center justify-between">
               <div>
                 <p className="font-heading text-[11px] tracking-wide text-foreground">{review.name}</p>
-                <p className="font-body text-[10px] text-muted-foreground mt-0.5">{review.location}</p>
               </div>
               <p className="font-body text-[9px] tracking-[0.15em] text-primary/70 uppercase text-right max-w-24 leading-tight">{review.product}</p>
             </div>
@@ -1151,7 +1142,7 @@ function NewsletterSection() {
   return (
     <section className="px-6 md:px-12 py-20 border-t border-border">
       <div className="max-w-xl mx-auto text-center">
-        <ArevakhachSymbol size={36} className="text-primary mx-auto mb-6" />
+        <OrnamentalDivider className="mx-auto mb-6 w-[min(86vw,440px)]" />
         <h2 className="font-heading text-2xl md:text-3xl tracking-wider mb-3">Ստացեք «Դրախտը» բրենդի նորությունները</h2>
         <p className="font-body text-sm text-muted-foreground mb-8 leading-relaxed">
           Նոր հավաքածուներ, անհատական պատվերների պատմություններ և հատուկ առաջարկներ՝ ուղարկված նույն խնամքով, ինչ մեր զարդատեսակները։
@@ -1194,14 +1185,14 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
         {/* Brand */}
         <div className="md:col-span-1">
           <div className="flex items-center gap-2.5 mb-5">
-            <ArevakhachSymbol size={28} className="text-primary" />
+            <BirdMark className="h-10 w-12" />
             <div>
               <p className="font-display text-lg tracking-[0.3em] text-foreground leading-none">ԴՐԱԽՏԸ</p>
-              <p className="font-body text-[8px] tracking-[0.3em] text-muted-foreground uppercase">Հայկական զարդատեսակներ</p>
+              <p className="font-body text-[8px] tracking-[0.3em] text-muted-foreground uppercase">Դարավոր «Բանի» իմաստը</p>
             </div>
           </div>
           <p className="font-body text-xs text-muted-foreground leading-relaxed mb-6">
-            Հայկական արծաթյա զարդատեսակներ՝ ոգեշնչված ժառանգությունից և ստեղծված ժամանակակից կրելու համար։
+            Հայկական արծաթյա զարդանախշեր
           </p>
           <div className="space-y-2 mb-6">
             <a href={`tel:${shopInfo.phone.replace(/\s/g, "")}`} className="font-body text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
@@ -1245,7 +1236,7 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
         ))}
       </div>
 
-      <OrnamentalDivider className="mb-8" />
+        <OrnamentalDivider className="mx-auto mb-8 w-[min(90vw,760px)]" />
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="font-body text-[10px] text-muted-foreground">
@@ -1420,8 +1411,8 @@ function ShopPage({
       {/* Page header */}
       <div className="px-6 md:px-12 py-10 border-b border-border text-center">
         <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Ամբողջ տեսականին</p>
-        <h1 className="font-heading text-3xl md:text-4xl tracking-wider">Բոլոր զարդատեսակները</h1>
-        <OrnamentalDivider className="max-w-xs mx-auto mt-4" />
+        <h1 className="font-heading text-3xl md:text-4xl tracking-wider">Դրախտի զարդատեսակները</h1>
+        <OrnamentalDivider className="mx-auto mt-4 w-[min(88vw,560px)]" />
       </div>
 
       <div className="flex">
@@ -1899,11 +1890,11 @@ function CollectionsPage({
   return (
     <div className="pt-24 min-h-screen">
       <div className="px-6 md:px-12 py-12 border-b border-border text-center">
-        <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Մեր աշխարհները</p>
+        <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Խորիմաստություններ</p>
         <h1 className="font-heading text-3xl md:text-4xl tracking-wider">Հավաքածուներ</h1>
-        <OrnamentalDivider className="max-w-xs mx-auto mt-4" />
+        <OrnamentalDivider className="mx-auto mt-4 w-[min(88vw,560px)]" />
         <p className="font-body text-sm text-muted-foreground mt-5 max-w-xl mx-auto leading-relaxed">
-          Յուրաքանչյուր հավաքածու պատմում է հայկական զարդարվեստի մի առանձին կողմը՝ ժամանակակից և կրելի ձևով։
+          Յուրաքանչյուր հավաքածուի խորհրդանիշը խորապես ուսումնասիրված պատմություն է։
         </p>
       </div>
 
@@ -1942,7 +1933,7 @@ function CollectionsPage({
                   <p className="font-heading text-sm tracking-wide text-primary mb-3">{formatAmdPrice(col.price)}</p>
                   <p className="font-body text-xs text-white/60 leading-relaxed mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-400">{col.tagline}</p>
                   <div className="flex items-center gap-2 text-primary">
-                    <span className="font-heading text-[10px] tracking-[0.25em] uppercase">Դիտել</span>
+                    <span className="font-heading text-[10px] tracking-[0.25em] uppercase">Տեսնել</span>
                     <ArrowRight size={12} className="group-hover:translate-x-2 transition-transform duration-300" />
                   </div>
                 </div>
@@ -1977,92 +1968,42 @@ function CollectionsPage({
 // ─── ABOUT PAGE ───────────────────────────────────────────────────────────────
 
 function AboutPage({ aboutContent }: { aboutContent: AboutContent | null }) {
-  const values = [
-    { icon: <Gem size={18} />, title: "Uncompromising Materials", desc: "18K and 22K gold, sterling silver, and gemstones selected personally by Armen from certified suppliers across five continents." },
-    { icon: <Award size={18} />, title: "Generational Craft", desc: "Armen trained under his father and grandfather — the fourth generation of Armenian goldsmiths in his family. No casting. Hand only." },
-    { icon: <Shield size={18} />, title: "Heritage Preservation", desc: "Ten percent of every sale funds the preservation of traditional Armenian goldsmithing techniques through the Yerevan Craft Academy." },
-    { icon: <Sparkles size={18} />, title: "Living Culture", desc: "We work with Armenian cultural historians to ensure every motif is correctly interpreted and honoured, not merely decorative." },
-  ];
-  const storyParagraphs = aboutContent?.description
-    ? splitIntoParagraphs(aboutContent.description)
-    : [
-        "Armen Petrosyan grew up watching his father beat gold into form. By twelve, he was cleaning tools. By eighteen, he was drawing designs. By twenty-six, he was in the workshops of Vienna and Florence, studying European goldsmithing alongside his deep Armenian training.",
-        "He returned to Yerevan in 2008 with a singular vision: to create an Armenian jewellery house that could speak to both Armenians everywhere and the broader world of luxury — a house that was proudly, unapologetically Armenian, yet crafted to international standards of excellence.",
-        "Areni opened its doors in 2010 with seven pieces. Today, we create over 200 unique designs, shipping to 48 countries, with a waiting list for bespoke commissions that runs twelve months.",
-      ];
-
   return (
-    <div className="pt-24 min-h-screen">
-      {/* Hero */}
-      <div className="relative h-72 md:h-96 overflow-hidden">
-        <img src={aboutContent?.imageUrl || "https://images.unsplash.com/photo-1688406264720-e2f9389c9ed1?w=1600&h=800&fit=crop&auto=format"} alt="Areni atelier" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-background/75" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Our Story</p>
-          <h1 className="font-heading text-4xl md:text-5xl tracking-wider">{aboutContent?.title || "The House of Areni"}</h1>
-          <OrnamentalDivider className="max-w-xs mx-auto mt-5" />
+    <div className="min-h-screen pt-24">
+      <section className="grid min-h-[calc(100svh-6rem)] lg:grid-cols-2">
+        <div className="relative min-h-[420px] overflow-hidden lg:min-h-0">
+          <img
+            src={aboutContent?.imageUrl || "https://images.unsplash.com/photo-1688406264720-e2f9389c9ed1?w=1400&h=1600&fit=crop&auto=format"}
+            alt="Դրախտը զարդանախշ"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/25" />
+          <div className="absolute bottom-5 right-5 h-10 w-10 border-b border-r border-white/60" />
         </div>
-      </div>
 
-      <div className="px-6 md:px-12 max-w-5xl mx-auto">
-        {/* Story */}
-        <div className="py-16 grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-4">Founded 2010</p>
-            <h2 className="font-heading text-2xl md:text-3xl tracking-wider mb-6 leading-snug">A Goldsmith's Legacy,<br />Shaped for Today</h2>
-            <div className="space-y-4 font-body text-sm text-foreground/70 leading-relaxed">
-              {storyParagraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        <div className="flex flex-col justify-center bg-background px-6 py-14 md:px-12 lg:px-16 lg:py-20">
+          <p className="mb-5 font-body text-[10px] uppercase tracking-[0.35em] text-primary">Մեր մասին</p>
+          <h1 className="mb-6 font-heading text-2xl leading-snug tracking-wide md:text-4xl">
+            «Մեր Սար ու Ձորերի» մասին․<br />մեր ընկերության առանձնահատկության մասին
+          </h1>
+          <OrnamentalDivider className="mb-8 w-[min(100%,600px)]" />
+
+          <div className="max-w-3xl space-y-4 font-body text-sm font-light leading-relaxed text-foreground/75">
+            <p>«Դրախտը» հայկականության գողտրիկ անկյուն է, որտեղ պատմությունը խորհրդանիշների տեսքով արտահայտված է արծաթյա զարդանախշերում։ Ամեն մի զարդանախշ առաջին հերթին խորհրդանիշ է, ակնարկ, ասելիք, իմաստ, հաղորդություն։</p>
+            <p>Դրանցում ամեն մի գիծ, ամեն մի թեքություն, ամեն մի կոր ուղղություն է՝ կյանքի ուղի, ընթացք, ճանապարհ, անցում, միավորում, միացում։</p>
+            <p>Մեր հարթակում չկա որևէ գործ, որը զուրկ է բովանդակությունից և կրում է միայն գեղեցիկի ու նրբագեղության կարգախոսը։ Մենք, ինչպես նաև մեր նախնիները, մշտապես փնտրում ենք իմաստն ու ճշմարտությունը՝ «Բանը», այն արահետը, որը տանում է դեպի Հավերժություն՝ «Դրախտը»։</p>
+            <p>Յուրաքանչյուր զարդատեսակ աշխարհ ի հայտ գալուց առաջ մենք խորապես ուսումնասիրում ենք տվյալ խորհրդանիշի իմաստը։ Քրքրում ենք պատմության էջերը, զրուցում գիտելիք կրող մարդկանց հետ՝ հասկանալու և Ձեզ փոխանցելու համար համամարդկային արժեք պարունակող խորիմաստությունները։</p>
+            <p>Մենք բաց ենք առաջարկների և դիտարկումների համար։ Մեր «Դրախտի» դռները միշտ բաց են փնտրողների առջև։</p>
+          </div>
+
+          <div className="mt-9 flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#b52025]">
+              <BirdMark className="h-12 w-12 !invert-0" />
             </div>
-          </div>
-          <div className="relative">
-            <img src="https://images.unsplash.com/photo-1626784213922-d9f1e050cf8f?w=700&h=850&fit=crop&auto=format" alt="Areni jewellery detail" className="w-full object-cover" />
-            <div className="absolute top-4 left-4 w-10 h-10 border-l-2 border-t-2 border-primary/50" />
-            <div className="absolute bottom-4 right-4 w-10 h-10 border-r-2 border-b-2 border-primary/50" />
+            <p className="font-heading text-base tracking-wide text-foreground md:text-lg">Դրախտը՝ դարավոր «Բանի» իմաստը</p>
           </div>
         </div>
-
-        <OrnamentalDivider className="mb-16" />
-
-        {/* Values */}
-        <div className="mb-16">
-          <div className="text-center mb-12">
-            <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">What We Stand For</p>
-            <h2 className="font-heading text-2xl md:text-3xl tracking-wider">Our Values</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {values.map(({ icon, title, desc }) => (
-              <div key={title} className="border border-border p-7 hover:border-primary/40 transition-colors relative group">
-                <div className="absolute top-3 left-3 w-3 h-3 border-l border-t border-primary/0 group-hover:border-primary/50 transition-all" />
-                <div className="text-primary mb-4">{icon}</div>
-                <h3 className="font-heading text-sm tracking-wider mb-2">{title}</h3>
-                <p className="font-body text-xs text-muted-foreground leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Process */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">How We Work</p>
-            <h2 className="font-heading text-2xl md:text-3xl tracking-wider">The Making of an Areni Piece</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[
-              { step: "01", title: "Design", desc: "Each design begins with weeks of research into Armenian ornamental history — manuscripts, khachkars, textiles." },
-              { step: "02", title: "Forging", desc: "Gold is hand-forged — never cast — ensuring the density, warmth, and weight that only hand-worked metal achieves." },
-              { step: "03", title: "Setting", desc: "Every gemstone is hand-set using traditional bead and bezel techniques refined over four generations." },
-              { step: "04", title: "Finishing", desc: "Final hand-polishing, quality inspection, and certification. Then presented in our signature lacquered box." },
-            ].map(({ step, title, desc }) => (
-              <div key={step} className="text-center p-5">
-                <p className="font-display text-3xl text-primary/20 mb-3">{step}</p>
-                <h3 className="font-heading text-sm tracking-wider mb-2 text-foreground">{title}</h3>
-                <p className="font-body text-xs text-muted-foreground leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -2070,7 +2011,7 @@ function AboutPage({ aboutContent }: { aboutContent: AboutContent | null }) {
 // ─── CUSTOM PAGE ──────────────────────────────────────────────────────────────
 
 function CustomPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", description: "", material: "", budget: "", timeline: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", description: "", budget: "" });
   const [sent, setSent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -2083,13 +2024,13 @@ function CustomPage() {
   return (
     <div className="pt-24 min-h-screen">
       {/* Hero */}
-      <div className="relative h-64 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1626784214536-d859187e0bd0?w=1600&h=600&fit=crop&auto=format" alt="Custom jewellery" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-background/80" />
+      <div className="relative h-[320px] overflow-hidden md:h-[420px]">
+        <img src={DRAKHT_ASSETS.customOrder} alt="Անհատական պատվերի հայկական խորհրդանիշներ" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-black/35" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Անհատական պատվեր</p>
-          <h1 className="font-heading text-4xl md:text-5xl tracking-wider">Պատվիրեք ձեր զարդատեսակը</h1>
-          <OrnamentalDivider className="max-w-xs mx-auto mt-5" />
+          <p className="font-body text-[10px] tracking-[0.35em] text-white/80 uppercase mb-3">Անհատական պատվեր</p>
+          <h1 className="font-heading text-3xl text-white md:text-5xl tracking-wider">Ինչպե՞ս կատարել անհատական պատվեր</h1>
+          <OrnamentalDivider className="mx-auto mt-5 w-[min(88vw,560px)] text-white/70 [&_img]:!invert-0" />
         </div>
       </div>
 
@@ -2097,30 +2038,15 @@ function CustomPage() {
         <div className="grid md:grid-cols-2 gap-14">
           {/* Info */}
           <div>
-            <h2 className="font-heading text-2xl tracking-wider mb-5">Ինչպես է ստեղծվում անհատական պատվերը</h2>
+            <h2 className="font-heading text-2xl tracking-wider mb-5">Ինչպե՞ս կատարել անհատական պատվեր</h2>
             <div className="space-y-4 font-body text-sm text-foreground/70 leading-relaxed mb-8">
-              <p>Յուրաքանչյուր անհատական զարդատեսակ սկսվում է ձեր գաղափարից՝ խորհրդանիշ, պատմություն, առիթ կամ մարդ, ում համար ստեղծվում է զարդատեսակը։</p>
-              <p>Մենք ձևավորում ենք էսքիզը, ընտրում նյութը և քարերը, հետո սկսում ձեռքի աշխատանքը՝ պահելով ձեզ ընթացքի մեջ։</p>
+              <p>Անհատական պատվերի դեպքում փորձեք որքան հնարավոր է մանրամասն նկարագրել Ձեր մտքերը այն զարդատեսակի մասին, որը ցանկանում եք պատվիրել՝ չափսը, նկարագիրը, զարդանախշի իմաստը և կրողի նախընտրությունները։</p>
+              <p>Կարող եք բեռնել նաև նկար՝ որպես օրինակ։ Լրացրեք, խնդրում ենք, «Անհատական պատվերի» էջում պահանջվող տեղեկատվությունը։</p>
+              <p>Եթե դժվարանում եք՝ կապ հաստատեք մեզ հետ։ Մեր աշխատակիցը կօգնի բոլոր հարցերում։</p>
+              <p>Պատվերը ստանալուց և ընդունելուց հետո մենք կպատրաստենք նախնական էսքիզը և կհամաձայնեցնենք Ձեզ հետ։ Ուղղումներից և Ձեր կողմից վերջնական հաստատումից հետո պատվերը կփոխանցվի մեր մասնագետներին՝ պատրաստելու համար։</p>
               <p>Պատրաստման ժամկետը կախված է բարդությունից։ Յուրաքանչյուր անհատական պատվեր ստանում է խնամքով փաթեթավորում և որակի ստուգում։</p>
             </div>
-
-            {/* Steps */}
-            <div className="space-y-5">
-              {[
-                { n: "01", title: "Submit Your Request", desc: "Fill in the form with as much or as little detail as you have." },
-                { n: "02", title: "Design Consultation", desc: "A call or meeting with Armen — in person in Yerevan, or via video worldwide." },
-                { n: "03", title: "Design Approval", desc: "Review detailed sketches and a material specification. Revise freely." },
-                { n: "04", title: "Crafting & Delivery", desc: "Your piece is made by hand and delivered to your door, insured and tracked." },
-              ].map(({ n, title, desc }) => (
-                <div key={n} className="flex gap-4">
-                  <span className="font-display text-primary/30 text-lg flex-shrink-0 w-8">{n}</span>
-                  <div>
-                    <p className="font-heading text-[11px] tracking-[0.15em] uppercase text-foreground mb-1">{title}</p>
-                    <p className="font-body text-xs text-muted-foreground leading-relaxed">{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <OrnamentalDivider className="w-[min(100%,560px)]" />
           </div>
 
           {/* Form */}
@@ -2140,7 +2066,7 @@ function CustomPage() {
               </div>
             ) : (
               <>
-                <h3 className="font-heading text-sm tracking-[0.2em] uppercase mb-6">Պատվերի հայտ</h3>
+                <h3 className="font-heading text-sm tracking-[0.2em] uppercase mb-6">Տեղեկատվության լրացման աղյուսակ</h3>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
@@ -2153,35 +2079,20 @@ function CustomPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Հեռախոս / WhatsApp</label>
+                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Հեռախոսահամար</label>
                     <input value={form.phone} onChange={(e) => update("phone", e.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground" />
                   </div>
                   <div>
-                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Նախընտրելի նյութ</label>
-                    <select value={form.material} onChange={(e) => update("material", e.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground appearance-none">
-                      <option value="">Ընտրել նյութը</option>
-                      <option>18K Yellow Gold</option>
-                      <option>18K White Gold</option>
-                      <option>18K Rose Gold</option>
-                      <option>22K Gold</option>
-                      <option>Արծաթ</option>
-                      <option>Դեռ որոշված չէ</option>
-                    </select>
+                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Բեռնել նկար</label>
+                    <input type="file" accept="image/*" className="w-full bg-input-background border border-border px-3 py-2 font-body text-xs text-muted-foreground file:mr-3 file:border-0 file:bg-primary file:px-3 file:py-1.5 file:font-heading file:text-[9px] file:uppercase file:tracking-[0.15em] file:text-primary-foreground focus:outline-none focus:border-primary/50" />
                   </div>
                   <div>
-                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Բյուջե</label>
-                    <select value={form.budget} onChange={(e) => update("budget", e.target.value)} className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground appearance-none">
-                      <option value="">Ընտրել միջակայք</option>
-                      <option>$500 – $1,000</option>
-                      <option>$1,000 – $2,500</option>
-                      <option>$2,500 – $5,000</option>
-                      <option>$5,000 – $10,000</option>
-                      <option>$10,000+</option>
-                    </select>
+                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Նախընտրելի բյուջե</label>
+                    <input value={form.budget} onChange={(e) => update("budget", e.target.value)} placeholder="Օրինակ՝ 150,000 AMD" className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground" />
                   </div>
                   <div>
-                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Նկարագրեք ձեր գաղափարը *</label>
-                    <textarea required value={form.description} onChange={(e) => update("description", e.target.value)} rows={4} placeholder="Գրեք զարդատեսակի պատմությունը, առիթը, խորհրդանիշերը կամ ցանկալի զգացողությունը..." className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground resize-none" />
+                    <label className="font-heading text-[9px] tracking-[0.25em] uppercase text-muted-foreground block mb-1.5">Նկարագրեք Ձեր նախընտրած զարդատեսակը *</label>
+                    <textarea required value={form.description} onChange={(e) => update("description", e.target.value)} rows={5} placeholder="Նշեք չափսը, նկարագիրը, զարդանախշի իմաստը և կրողի նախընտրությունները..." className="w-full bg-input-background border border-border px-3 py-2.5 font-body text-xs focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground resize-none" />
                   </div>
                   <button type="submit" className="w-full py-3.5 bg-primary text-primary-foreground font-heading text-xs tracking-[0.25em] uppercase hover:bg-primary/90 transition-colors mt-2 flex items-center justify-center gap-2">
                     Ուղարկել հայտը
