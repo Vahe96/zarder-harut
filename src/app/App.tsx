@@ -954,27 +954,18 @@ function ProductCategorySlider({
 
 // ─── HERITAGE BANNER ──────────────────────────────────────────────────────────
 
-function HeritageBanner({ onNavigate }: { onNavigate: (p: Page) => void }) {
+function HeritageBanner() {
   return (
-    <section className="relative mb-16 flex min-h-[440px] items-center overflow-hidden md:mb-24 md:min-h-[500px]">
+    <section className="relative mb-16 overflow-hidden md:mb-24">
       <img
         src={DRAKHT_ASSETS.pomegranates}
         alt="Հարատև կյանքի մշակույթը ներկայացնող հայկական խորհրդանիշներ"
-        className="absolute inset-0 h-full w-full object-cover object-right"
+        className="block h-[140px] w-auto max-w-none sm:h-auto sm:w-full"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,#000_0%,#000_46%,rgba(0,0,0,0.72)_64%,rgba(0,0,0,0.16)_100%)]" />
-
-      <div className="relative z-10 max-w-4xl px-6 py-16 text-white md:px-16">
-        <div className="flex items-center gap-3 mb-6">
-          <BirdMark className="h-11 w-14 !invert-0" />
-          <span className="font-body text-[10px] tracking-[0.32em] text-white/80 uppercase">Դարավոր «Բանի» իմաստը</span>
-        </div>
-        <h2 className="mb-6 max-w-3xl font-heading text-3xl leading-snug tracking-wide md:text-5xl">
-          Հարատև կյանքի մշակույթ և արվեստ՝<br />Հայկականություն
-        </h2>
-        <p className="max-w-2xl font-body text-sm font-light leading-relaxed text-white/85 md:text-base">
-          Հայկական ամբողջ պատմությունն ու մշակույթը՝ կյանքի, շարունակականության, հարատևման, բարեկեցության, վերածննդի, մարդասիրության և գիտելիքի մասին է, ինչն արտահայտված է նաև մեր «Դրախտը» զարդանախշերում։
-        </p>
+      <div className="sr-only">
+        <p>Դարավոր «Բանի» իմաստը</p>
+        <h2>Հարատև կյանքի մշակույթ և արվեստ՝ Հայկականություն</h2>
+        <p>Հայկական ամբողջ պատմությունն ու մշակույթը՝ կյանքի, շարունակականության, հարատևման, բարեկեցության, վերածննդի, մարդասիրության և գիտելիքի մասին է, ինչն արտահայտված է նաև մեր «Դրախտը» զարդանախշերում։</p>
       </div>
     </section>
   );
@@ -1304,7 +1295,7 @@ function HomePage({
         </div>
       )}
       <CategoryCarousel onViewCategory={onViewCategory} products={products} />
-      <HeritageBanner onNavigate={onNavigate} />
+      <HeritageBanner />
       <BrandStorySection />
       <FeaturesStrip />
       <ReviewsSection />
