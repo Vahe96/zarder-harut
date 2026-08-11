@@ -281,18 +281,6 @@ function BirdMark({ className = "" }: { className?: string }) {
   return <img src={DRAKHT_ASSETS.bird} alt="" className={`shrink-0 object-contain invert dark:invert-0 ${className}`} aria-hidden="true" />;
 }
 
-function YoutubeBrandMark({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 28 20" className={className} aria-hidden="true">
-      <path
-        fill="#ff0000"
-        d="M27.42 3.12A3.52 3.52 0 0 0 24.94.63C22.74 0 14 0 14 0S5.26 0 3.06.63A3.52 3.52 0 0 0 .58 3.12 36.9 36.9 0 0 0 0 10a36.9 36.9 0 0 0 .58 6.88 3.52 3.52 0 0 0 2.48 2.49C5.26 20 14 20 14 20s8.74 0 10.94-.63a3.52 3.52 0 0 0 2.48-2.49A36.9 36.9 0 0 0 28 10a36.9 36.9 0 0 0-.58-6.88Z"
-      />
-      <path fill="#fff" d="m11.2 14.29 7.27-4.29-7.27-4.29v8.58Z" />
-    </svg>
-  );
-}
-
 function PomegranateIcon({ size = 24, className = "" }: { size?: number; className?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
@@ -543,12 +531,12 @@ function Nav({
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm transition-all duration-400 ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.18)]" : ""}`}>
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 lg:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] lg:px-8 lg:py-3 xl:px-12">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 lg:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] lg:px-8 lg:py-3 xl:px-12">
         {/* Logo */}
         <a
           href={pageHref("home")}
           onClick={(event) => handleInternalLink(event, () => onNavigate("home"))}
-          className="group flex min-w-0 items-center justify-start overflow-hidden"
+          className="group col-start-2 flex min-w-0 items-center justify-center overflow-hidden lg:col-start-1 lg:justify-start lg:pl-8 xl:pl-12"
           aria-label="Դրախտը՝ գլխավոր էջ"
         >
           <picture>
@@ -556,7 +544,7 @@ function Nav({
             <img
               src={DRAKHT_ASSETS.logoWeb}
               alt="Դրախտը"
-              className={`h-8 w-auto max-w-[100px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:max-w-[180px] lg:h-7 lg:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
+              className={`h-11 w-auto max-w-[140px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:h-12 sm:max-w-[170px] lg:h-7 lg:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
             />
           </picture>
         </a>
@@ -568,7 +556,7 @@ function Nav({
               key={page}
               href={pageHref(page)}
               onClick={(event) => handleInternalLink(event, () => onNavigate(page))}
-              className={`font-heading text-[11px] tracking-[0.08em] transition-colors relative group ${currentPage === page ? "text-foreground" : "text-foreground/70 hover:text-foreground"}`}
+              className={`relative font-heading text-[11px] tracking-[0.08em] transition-colors group ${currentPage === page ? "text-foreground" : "text-foreground/90 hover:text-foreground"}`}
             >
               {label}
               <span className={`absolute -bottom-1 left-0 right-0 h-px bg-foreground/70 transition-transform duration-300 origin-left ${currentPage === page ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
@@ -577,7 +565,7 @@ function Nav({
         </nav>
 
         {/* Right icons */}
-        <div className="flex items-center justify-end gap-2 sm:gap-4">
+        <div className="col-start-3 flex items-center justify-end gap-2 sm:gap-4">
           <button onClick={onThemeToggle} className="grid h-8 w-8 place-items-center border border-border text-foreground/65 transition-colors hover:border-primary hover:text-primary" aria-label={themeMode === "dark" ? "Միացնել բաց ռեժիմը" : "Միացնել մուգ ռեժիմը"} title={themeMode === "dark" ? "Բաց ռեժիմ" : "Մուգ ռեժիմ"}>
             {themeMode === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
@@ -621,7 +609,7 @@ function Nav({
               key={page}
               href={pageHref(page)}
               onClick={(event) => handleInternalLink(event, () => { onNavigate(page); setMobileOpen(false); })}
-              className={`font-heading text-xs tracking-[0.08em] text-left transition-colors ${currentPage === page ? "text-foreground" : "text-foreground/70"}`}
+              className={`font-heading text-xs tracking-[0.08em] text-left transition-colors ${currentPage === page ? "text-foreground" : "text-foreground/90"}`}
               >
                 {label}
               </a>
@@ -677,7 +665,7 @@ function HeroSection({ onNavigate, themeMode }: { onNavigate: (p: Page) => void;
               onClick={(event) => handleInternalLink(event, () => onNavigate("shop"))}
               className={`group px-3 py-2.5 text-center font-heading text-[10px] tracking-[0.02em] transition-all md:px-5 md:py-3 md:text-[11px] ${themeMode === "dark" ? "border border-white bg-white text-black hover:bg-white/85" : "border border-black bg-black text-white hover:bg-black/80"}`}
             >
-              Տեսականի / Հավաքածուներ
+              Զարդատեսակներ / Հավաքածուներով
               <ArrowRight size={13} className="ml-2 hidden align-[-2px] transition-transform group-hover:translate-x-1 md:inline-block" />
             </a>
             <a
@@ -1110,9 +1098,9 @@ function InstagramGallery() {
   return (
     <section className="py-16 bg-secondary/20">
       <div className="text-center mb-10 px-6">
-        <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Հետևեք մեր աշխարհին</p>
+        <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-2">Դրախտը սոցցանցերում</p>
         <div className="font-heading text-2xl tracking-wider flex items-center justify-center gap-2">
-          <Instagram size={20} className="text-primary" /> @areni.jewels
+          <Instagram size={20} className="text-primary" /> @ Armenian paradise
         </div>
       </div>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-1 px-1">
@@ -1180,6 +1168,9 @@ function NewsletterSection() {
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 
 function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopInfo: ShopInfo }) {
+  const footerPhone = "+374 91533553";
+  const footerEmail = "qaylupprod@gmail.com";
+
   return (
     <footer className="bg-card border-t border-border px-6 md:px-12 pt-16 pb-8">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-14">
@@ -1196,11 +1187,11 @@ function Footer({ onNavigate, shopInfo }: { onNavigate: (p: Page) => void; shopI
             Հայկական արծաթյա զարդանախշեր
           </p>
           <div className="space-y-2 mb-6">
-            <a href={`tel:${shopInfo.phone.replace(/\s/g, "")}`} className="font-body text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-              <Phone size={12} className="text-primary" /> {shopInfo.phone}
+            <a href={`tel:${footerPhone.replace(/\s/g, "")}`} className="font-body text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+              <Phone size={12} className="text-primary" /> {footerPhone}
             </a>
-            <a href={`mailto:${shopInfo.email}`} className="font-body text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-              <Mail size={12} className="text-primary" /> {shopInfo.email}
+            <a href={`mailto:${footerEmail}`} className="font-body text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
+              <Mail size={12} className="text-primary" /> {footerEmail}
             </a>
           </div>
           <div className="flex gap-3">
@@ -1728,8 +1719,7 @@ function ProductDetailPage({
                 rel="noopener noreferrer"
                 className="inline-flex min-h-11 w-full items-center justify-center gap-2.5 border border-foreground/25 bg-background px-5 py-2.5 font-heading text-[10px] uppercase tracking-[0.16em] text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:col-start-2 sm:row-start-2"
               >
-                <YoutubeBrandMark className="h-4 w-[1.4rem] shrink-0" />
-                Տեսնել տեսանյութը
+                Տեսնել տեսահոլովակը
               </a>
             )}
           </div>
