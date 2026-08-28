@@ -41,6 +41,25 @@
   --sidebar-ring: rgba(8, 7, 5, 0.28);
 }
 
+/* Follow the bird's horizontal position while the desktop hero uses object-cover. */
+@media (min-width: 1400px) {
+  .header-brand {
+    position: absolute;
+    left: calc(50vw - 665px);
+    padding-left: 0;
+  }
+
+  .header-brand-image {
+    height: 1.5rem;
+  }
+}
+
+@media (min-width: 1667px) {
+  .header-brand {
+    left: calc(15.324vw - 87.5px);
+  }
+}
+
 .dark {
   --background: #080705;
   --foreground: #F0E4C4;
