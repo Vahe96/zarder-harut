@@ -531,12 +531,12 @@ function Nav({
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm transition-all duration-400 ${isScrolled ? "shadow-[0_10px_30px_rgba(0,0,0,0.18)]" : ""}`}>
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 lg:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] lg:px-8 lg:py-3 xl:px-12">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-5 xl:grid-cols-[minmax(180px,1fr)_auto_minmax(180px,1fr)] xl:px-12 xl:py-3">
         {/* Logo */}
         <a
           href={pageHref("home")}
           onClick={(event) => handleInternalLink(event, () => onNavigate("home"))}
-          className="group col-start-2 flex min-w-0 items-center justify-center overflow-hidden lg:col-start-1 lg:justify-start lg:pl-8 xl:pl-12"
+          className="group col-start-2 flex min-w-0 items-center justify-center overflow-hidden xl:col-start-1 xl:justify-start xl:pl-20"
           aria-label="Դրախտը՝ գլխավոր էջ"
         >
           <picture>
@@ -544,13 +544,13 @@ function Nav({
             <img
               src={DRAKHT_ASSETS.logoWeb}
               alt="Դրախտը"
-              className={`h-11 w-auto max-w-[140px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:h-12 sm:max-w-[170px] lg:h-7 lg:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
+              className={`h-11 w-auto max-w-[140px] object-contain opacity-90 transition-all group-hover:opacity-100 sm:h-12 sm:max-w-[170px] xl:h-7 xl:max-w-[210px] ${themeMode === "light" ? "invert" : ""}`}
             />
           </picture>
         </a>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center justify-center gap-4 whitespace-nowrap lg:flex xl:gap-8">
+        <nav className="hidden items-center justify-center gap-8 whitespace-nowrap xl:flex">
           {navLinks.map(({ label, page }) => (
             <a
               key={page}
@@ -572,7 +572,7 @@ function Nav({
           <a
             href={pageHref("shop")}
             onClick={(event) => handleInternalLink(event, () => onNavigate("shop"))}
-            className="hidden text-foreground/65 transition-colors hover:text-foreground lg:flex"
+            className="hidden text-foreground/65 transition-colors hover:text-foreground xl:flex"
             aria-label="Որոնում"
           >
             <Search size={17} />
@@ -595,14 +595,14 @@ function Nav({
               <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-primary text-primary-foreground text-[8px] font-heading rounded-full flex items-center justify-center">{cartCount}</span>
             )}
           </button>
-          <button className="text-foreground/70 transition-colors hover:text-foreground lg:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Մենյու">
+          <button className="text-foreground/70 transition-colors hover:text-foreground xl:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Մենյու">
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
-      <div className={`overflow-hidden border-t border-border transition-all duration-300 lg:hidden ${mobileOpen ? "max-h-80" : "max-h-0"}`}>
+      <div className={`overflow-hidden border-t border-border transition-all duration-300 xl:hidden ${mobileOpen ? "max-h-80" : "max-h-0"}`}>
         <nav className="flex flex-col px-6 py-4 gap-4 bg-background/98">
           {navLinks.map(({ label, page }) => (
             <a
