@@ -782,7 +782,7 @@ function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (categ
   return (
     <section className="px-6 md:px-12 py-16 md:py-24 bg-secondary/30">
       <div className="relative mb-10 text-center">
-        <h2 className="font-heading text-3xl md:text-4xl tracking-wider">Կատեգորիաներ</h2>
+        <h2 className="font-heading text-3xl md:text-4xl tracking-wider">Զարդատեսակներ</h2>
         <OrnamentalDivider className="mx-auto mt-5 w-[min(72vw,720px)]" />
       </div>
 
@@ -791,7 +791,7 @@ function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (categ
           type="button"
           onClick={() => scroll("left")}
           className="absolute left-0 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center border border-primary/35 bg-black/60 text-primary transition-colors hover:border-primary hover:bg-primary hover:text-black md:-left-5"
-          aria-label="Նախորդ կատեգորիաներ"
+          aria-label="Նախորդ զարդատեսակներ"
         >
           <ChevronLeft size={19} />
         </button>
@@ -799,7 +799,7 @@ function CategoryCarousel({ onViewCategory, products }: { onViewCategory: (categ
           type="button"
           onClick={() => scroll("right")}
           className="absolute right-0 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center border border-primary/35 bg-black/60 text-primary transition-colors hover:border-primary hover:bg-primary hover:text-black md:-right-5"
-          aria-label="Հաջորդ կատեգորիաներ"
+          aria-label="Հաջորդ զարդատեսակներ"
         >
           <ChevronRight size={19} />
         </button>
