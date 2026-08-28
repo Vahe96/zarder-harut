@@ -45,18 +45,18 @@
 @media (min-width: 1400px) {
   .header-brand {
     position: absolute;
-    left: calc(50vw - 665px);
+    left: calc(50vw - 680px);
     padding-left: 0;
   }
 
   .header-brand-image {
-    height: 1.5rem;
+    height: 1.75rem;
   }
 }
 
 @media (min-width: 1667px) {
   .header-brand {
-    left: calc(15.324vw - 87.5px);
+    left: calc(15.324vw - 102px);
   }
 }
 
