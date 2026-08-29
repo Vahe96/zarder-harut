@@ -1781,7 +1781,6 @@ function CollectionDetailPage({
     return ownProducts.map((product) => knownById.get(product.id) ?? product);
   }, [collection, products]);
 
-  const productsTotal = collectionProducts.reduce((sum, product) => sum + product.price, 0);
   const collectionAvailable = collection.price > 0
     && collectionProducts.length > 0
     && collectionProducts.every((product) => product.inStock);
@@ -1804,15 +1803,9 @@ function CollectionDetailPage({
           <h1 className="font-heading text-3xl md:text-5xl tracking-wider leading-tight mb-5">{collection.name}</h1>
           <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-7 font-light">{collection.tagline}</p>
 
-          <div className="grid sm:grid-cols-2 gap-4 mb-8">
-            <div className="border border-border p-5">
-              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-2">Ամբողջ հավաքածուն</p>
-              <p className="font-heading text-xl text-primary">{formatAmdPrice(collection.price)}</p>
-            </div>
-            <div className="border border-border p-5">
-              <p className="font-body text-[10px] tracking-[0.25em] uppercase text-muted-foreground mb-2">Առանձին զարդատեսակներով</p>
-              <p className="font-heading text-xl text-primary">{formatAmdPrice(productsTotal)}</p>
-            </div>
+          <div className="mb-8 flex items-end justify-between gap-5 border-y border-border py-5">
+            <p className="font-body text-[10px] uppercase tracking-[0.25em] text-foreground">Ամբողջ հավաքածուն</p>
+            <p className="shrink-0 font-heading text-xl text-primary md:text-2xl">{formatAmdPrice(collection.price)}</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -1834,43 +1827,41 @@ function CollectionDetailPage({
         </div>
       </section>
 
-      <section id="collection-products" className="px-6 md:px-12 py-16 md:py-24 bg-secondary/30 scroll-mt-24">
-        <div className="mx-auto mb-12 max-w-3xl text-center md:mb-14">
-          <div className="mb-5 inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border border-border bg-background px-4 py-2.5">
-            <Gem size={14} className="shrink-0 text-primary" aria-hidden="true" />
-            <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-foreground">
-              «{collection.name}» հավաքածու
-            </span>
-            <span className="hidden h-4 w-px bg-border sm:block" aria-hidden="true" />
-            <span className="font-body text-[10px] uppercase tracking-[0.16em] text-foreground">
-              {collectionProducts.length} զարդատեսակ
-            </span>
+      <section id="collection-products" className="scroll-mt-24 border-b border-border bg-secondary/30">
+        <div className="grid border-b border-border bg-foreground text-background md:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="px-6 py-9 md:px-12 md:py-11">
+            <div className="mb-3 flex items-center gap-3">
+              <Gem size={14} className="shrink-0" aria-hidden="true" />
+              <span className="font-body text-[10px] uppercase tracking-[0.32em]">Հավաքածուի զարդատեսակները</span>
+            </div>
+            <h2 className="font-heading text-3xl leading-tight tracking-wider md:text-4xl">{collection.name}</h2>
           </div>
-          <h2 className="font-heading text-3xl tracking-wider md:text-4xl">Այս հավաքածուի զարդատեսակները</h2>
-          <p className="mx-auto mt-4 max-w-2xl font-body text-sm leading-relaxed text-foreground">
-            Ստորև ներկայացված բոլոր զարդատեսակները «{collection.name}» հավաքածուի մասն են։ Յուրաքանչյուրը կարող եք ընտրել առանձին։
-          </p>
-          <OrnamentalDivider className="mx-auto mt-6 w-[min(72vw,720px)]" />
+          <div className="flex items-center justify-between gap-6 border-t border-background/25 px-6 py-5 md:min-w-56 md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:px-12 md:py-8">
+            <span className="font-body text-4xl font-light leading-none tabular-nums md:text-5xl">{String(collectionProducts.length).padStart(2, "0")}</span>
+            <span className="font-body text-[9px] uppercase tracking-[0.3em]">զարդատեսակ</span>
+          </div>
         </div>
 
-        {collectionProducts.length === 0 ? (
-          <div className="text-center py-16 border border-border bg-background/40">
-            <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդատեսակներ չկան։</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10">
-            {collectionProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={onAddToCart}
-                onToggleWishlist={onToggleWishlist}
-                onViewProduct={onViewProduct}
-                isWishlisted={wishlist.includes(product.id)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="px-6 py-12 md:px-12 md:py-16">
+          {collectionProducts.length === 0 ? (
+            <div className="border border-border bg-background/40 py-16 text-center">
+              <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդատեսակներ չկան։</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4">
+              {collectionProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={onAddToCart}
+                  onToggleWishlist={onToggleWishlist}
+                  onViewProduct={onViewProduct}
+                  isWishlisted={wishlist.includes(product.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );
