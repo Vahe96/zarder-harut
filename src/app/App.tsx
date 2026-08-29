@@ -1835,10 +1835,22 @@ function CollectionDetailPage({
       </section>
 
       <section id="collection-products" className="px-6 md:px-12 py-16 md:py-24 bg-secondary/30 scroll-mt-24">
-        <div className="text-center mb-12">
-          <p className="font-body text-[10px] tracking-[0.35em] text-primary uppercase mb-3">Հավաքածուի զարդատեսակները</p>
-          <h2 className="font-heading text-3xl md:text-4xl tracking-wider">{collection.name}</h2>
-          <OrnamentalDivider className="mx-auto mt-5 w-[min(72vw,720px)]" />
+        <div className="mx-auto mb-12 max-w-3xl text-center md:mb-14">
+          <div className="mb-5 inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1.5 border border-border bg-background px-4 py-2.5">
+            <Gem size={14} className="shrink-0 text-primary" aria-hidden="true" />
+            <span className="font-heading text-[10px] uppercase tracking-[0.2em] text-foreground">
+              «{collection.name}» հավաքածու
+            </span>
+            <span className="hidden h-4 w-px bg-border sm:block" aria-hidden="true" />
+            <span className="font-body text-[10px] uppercase tracking-[0.16em] text-foreground">
+              {collectionProducts.length} զարդատեսակ
+            </span>
+          </div>
+          <h2 className="font-heading text-3xl tracking-wider md:text-4xl">Այս հավաքածուի զարդատեսակները</h2>
+          <p className="mx-auto mt-4 max-w-2xl font-body text-sm leading-relaxed text-foreground">
+            Ստորև ներկայացված բոլոր զարդատեսակները «{collection.name}» հավաքածուի մասն են։ Յուրաքանչյուրը կարող եք ընտրել առանձին։
+          </p>
+          <OrnamentalDivider className="mx-auto mt-6 w-[min(72vw,720px)]" />
         </div>
 
         {collectionProducts.length === 0 ? (
