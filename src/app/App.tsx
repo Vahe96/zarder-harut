@@ -1786,17 +1786,18 @@ function CollectionDetailPage({
   const collectionTagline = collection.tagline.trim();
   const showCollectionTagline = Boolean(collectionTagline)
     && normalizeCollectionCopy(collectionTagline).toLowerCase() !== collectionTitle.toLowerCase();
-  const galleryColumnClass = collectionProducts.length <= 1
-    ? "md:grid-cols-1"
-    : collectionProducts.length === 2
-      ? "md:grid-cols-2"
-      : "md:grid-cols-3";
-  const galleryRowClass = collectionProducts.length <= 3 ? "md:grid-rows-1" : "md:grid-rows-2";
+  const gallerySource = collectionProducts.flatMap((product) => {
+    const images = product.images?.length ? product.images : [product.image];
+    return images.map((image) => ({ image, product }));
+  });
+  const galleryItems = gallerySource.length === 0
+    ? []
+    : Array.from({ length: 6 }, (_, index) => gallerySource[index % gallerySource.length]);
 
   return (
     <div className="min-h-screen bg-background pt-24">
       <section className="border-b border-border px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:py-20">
-        <header className="mx-auto max-w-4xl text-center">
+        <header className="mx-auto max-w-[1180px] text-center">
           <h1 className="font-heading text-3xl leading-tight tracking-wider sm:text-4xl md:text-[42px]">
             «{collectionTitle}» հավաքածու
           </h1>
@@ -1820,17 +1821,17 @@ function CollectionDetailPage({
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
               </div>
 
-              <div className={`grid grid-cols-2 gap-3 md:h-full md:gap-4 ${galleryColumnClass} ${galleryRowClass}`}>
-                {collectionProducts.map((product) => (
+              <div className="grid grid-cols-2 gap-3 md:h-full md:grid-cols-3 md:grid-rows-2 md:gap-4">
+                {galleryItems.map(({ image, product }, index) => (
                   <a
-                    key={product.id}
+                    key={`${product.id}-${index}`}
                     href={productHref(product.id)}
                     onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
                     className="group relative aspect-[3/4] min-h-0 overflow-hidden bg-secondary md:aspect-auto md:h-full"
                     aria-label={`Տեսնել ${product.name} զարդատեսակը`}
                   >
                     <img
-                      src={product.image}
+                      src={image}
                       alt={product.name}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
