@@ -1761,18 +1761,12 @@ function CollectionDetailPage({
   collection,
   products,
   onAddCollectionToCart,
-  onAddToCart,
-  onToggleWishlist,
   onViewProduct,
-  wishlist,
 }: {
   collection: Collection;
   products: Product[];
   onAddCollectionToCart: (collection: Collection, products: Product[]) => void;
-  onAddToCart: (p: Product, quantity?: number) => void;
-  onToggleWishlist: (id: number) => void;
   onViewProduct: (id: number) => void;
-  wishlist: number[];
 }) {
   const collectionProducts = useMemo(() => {
     const ownProducts = collection.products ?? [];
@@ -1784,83 +1778,97 @@ function CollectionDetailPage({
   const collectionAvailable = collection.price > 0
     && collectionProducts.length > 0
     && collectionProducts.every((product) => product.inStock);
+  const normalizeCollectionCopy = (value: string) => value
+    .replace(/[«»]/g, "")
+    .replace(/\s+հավաքածու(?:ներ)?$/iu, "")
+    .trim();
+  const collectionTitle = normalizeCollectionCopy(collection.name);
+  const collectionTagline = collection.tagline.trim();
+  const showCollectionTagline = Boolean(collectionTagline)
+    && normalizeCollectionCopy(collectionTagline).toLowerCase() !== collectionTitle.toLowerCase();
+  const galleryColumnClass = collectionProducts.length <= 1
+    ? "md:grid-cols-1"
+    : collectionProducts.length === 2
+      ? "md:grid-cols-2"
+      : "md:grid-cols-3";
+  const galleryRowClass = collectionProducts.length <= 3 ? "md:grid-rows-1" : "md:grid-rows-2";
 
   return (
-    <div className="pt-24 min-h-screen">
-      <section className="px-6 md:px-12 py-10 md:py-16 grid lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] gap-10 md:gap-14 border-b border-border">
-        <div className="relative overflow-hidden bg-secondary aspect-[4/3] lg:aspect-[5/4]">
-          <img src={collection.image} alt={collection.name} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/15" />
-          <div className="absolute top-5 left-5 w-10 h-10 border-l border-t border-primary/50" />
-          <div className="absolute bottom-5 right-5 w-10 h-10 border-r border-b border-primary/50" />
-        </div>
+    <div className="min-h-screen bg-background pt-24">
+      <section className="border-b border-border px-5 py-12 sm:px-8 md:px-12 md:py-16 lg:py-20">
+        <header className="mx-auto max-w-4xl text-center">
+          <h1 className="font-heading text-3xl leading-tight tracking-wider sm:text-4xl md:text-[42px]">
+            «{collectionTitle}» հավաքածու
+          </h1>
+          <OrnamentalDivider className="mx-auto mt-5 w-[min(78vw,640px)]" />
+          {showCollectionTagline && (
+            <p className="mx-auto mt-5 max-w-2xl font-body text-sm font-light leading-relaxed text-foreground md:text-base">
+              {collectionTagline}
+            </p>
+          )}
+        </header>
 
-        <div className="self-center">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="h-px w-10 bg-primary/60" />
-            <span className="font-body text-[10px] tracking-[0.35em] text-primary uppercase">Հավաքածու</span>
+        <div id="collection-products" className="mx-auto mt-10 max-w-[1180px] scroll-mt-24 md:mt-14">
+          {collectionProducts.length === 0 ? (
+            <div className="border border-border bg-secondary/20 py-20 text-center">
+              <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդատեսակներ չկան։</p>
+            </div>
+          ) : (
+            <div className="grid gap-3 md:h-[clamp(520px,48vw,720px)] md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.45fr)] md:gap-4">
+              <div className="relative aspect-[4/5] overflow-hidden bg-secondary md:aspect-auto md:h-full">
+                <img src={collection.image} alt={collection.name} className="h-full w-full object-cover" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
+              </div>
+
+              <div className={`grid grid-cols-2 gap-3 md:h-full md:gap-4 ${galleryColumnClass} ${galleryRowClass}`}>
+                {collectionProducts.map((product) => (
+                  <a
+                    key={product.id}
+                    href={productHref(product.id)}
+                    onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
+                    className="group relative aspect-[3/4] min-h-0 overflow-hidden bg-secondary md:aspect-auto md:h-full"
+                    aria-label={`Տեսնել ${product.name} զարդատեսակը`}
+                  >
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100" />
+                    <div className="absolute inset-x-0 bottom-0 translate-y-3 px-4 pb-4 text-left opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                      <span className="font-heading text-xs tracking-wide text-white">{product.name}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mx-auto mt-10 max-w-3xl border border-border px-5 py-4 text-center md:mt-12 md:px-8">
+            <p className="font-heading text-lg tracking-wide sm:text-xl md:text-2xl">
+              Ամբողջ հավաքածուն՝ <span className="whitespace-nowrap">{formatAmdPrice(collection.price)}</span>
+            </p>
           </div>
-          <h1 className="font-heading text-3xl md:text-5xl tracking-wider leading-tight mb-5">{collection.name}</h1>
-          <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-7 font-light">{collection.tagline}</p>
 
-          <div className="mb-8 flex items-end justify-between gap-5 border-y border-border py-5">
-            <p className="font-body text-[10px] uppercase tracking-[0.25em] text-foreground">Ամբողջ հավաքածուն</p>
-            <p className="shrink-0 font-heading text-xl text-primary md:text-2xl">{formatAmdPrice(collection.price)}</p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="mx-auto mt-8 grid max-w-4xl gap-3 sm:grid-cols-2 md:gap-5">
             <button
               onClick={() => onAddCollectionToCart(collection, collectionProducts)}
               disabled={!collectionAvailable}
-              className="flex-1 py-4 bg-primary text-primary-foreground font-heading text-xs tracking-[0.22em] uppercase hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-14 bg-primary px-6 py-4 font-heading text-xs uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {collectionAvailable ? "Գնել ամբողջ հավաքածուն" : "Հավաքածուն հասանելի չէ"}
+              {collectionAvailable ? `Գնել «${collectionTitle}» հավաքածուն` : "Հավաքածուն հասանելի չէ"}
             </button>
             <button
               type="button"
               onClick={() => document.getElementById("collection-products")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="flex-1 py-4 border border-border text-center font-heading text-xs tracking-[0.22em] uppercase text-foreground/80 hover:border-primary hover:text-primary transition-colors"
+              disabled={collectionProducts.length === 0}
+              className="min-h-14 border border-foreground/50 px-6 py-4 font-heading text-xs uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Ընտրել առանձին զարդատեսակներ
+              Գնել առանձին զարդատեսակ
             </button>
           </div>
-        </div>
-      </section>
 
-      <section id="collection-products" className="scroll-mt-24 border-b border-border bg-secondary/30">
-        <div className="grid border-b border-border bg-foreground text-background md:grid-cols-[minmax(0,1fr)_auto]">
-          <div className="px-6 py-9 md:px-12 md:py-11">
-            <div className="mb-3 flex items-center gap-3">
-              <Gem size={14} className="shrink-0" aria-hidden="true" />
-              <span className="font-body text-[10px] uppercase tracking-[0.32em]">Հավաքածուի զարդատեսակները</span>
-            </div>
-            <h2 className="font-heading text-3xl leading-tight tracking-wider md:text-4xl">{collection.name}</h2>
-          </div>
-          <div className="flex items-center justify-between gap-6 border-t border-background/25 px-6 py-5 md:min-w-56 md:flex-col md:items-end md:justify-center md:border-l md:border-t-0 md:px-12 md:py-8">
-            <span className="font-body text-4xl font-light leading-none tabular-nums md:text-5xl">{String(collectionProducts.length).padStart(2, "0")}</span>
-            <span className="font-body text-[9px] uppercase tracking-[0.3em]">զարդատեսակ</span>
-          </div>
-        </div>
-
-        <div className="px-6 py-12 md:px-12 md:py-16">
-          {collectionProducts.length === 0 ? (
-            <div className="border border-border bg-background/40 py-16 text-center">
-              <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդատեսակներ չկան։</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4">
-              {collectionProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onAddToCart={onAddToCart}
-                  onToggleWishlist={onToggleWishlist}
-                  onViewProduct={onViewProduct}
-                  isWishlisted={wishlist.includes(product.id)}
-                />
-              ))}
-            </div>
-          )}
+          <OrnamentalDivider className="mx-auto mt-12 w-[min(78vw,640px)] md:mt-16" />
         </div>
       </section>
     </div>
@@ -3377,10 +3385,7 @@ export default function App() {
             collection={selectedCollection}
             products={products}
             onAddCollectionToCart={addCollectionToCart}
-            onAddToCart={addToCart}
-            onToggleWishlist={toggleWishlist}
             onViewProduct={viewProduct}
-            wishlist={wishlist}
           />
         )}
         {page === "custom" && <CustomPage />}
