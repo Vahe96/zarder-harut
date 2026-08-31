@@ -1815,7 +1815,7 @@ function CollectionDetailPage({
               <p className="font-heading text-sm tracking-wider text-muted-foreground">Այս հավաքածուում դեռ զարդատեսակներ չկան։</p>
             </div>
           ) : (
-            <div className="grid gap-3 md:h-[clamp(520px,48vw,720px)] md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.45fr)] md:gap-4">
+            <div className="grid gap-3 md:aspect-[41/20] md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.45fr)] md:gap-4">
               <div className="relative aspect-[4/5] overflow-hidden bg-secondary md:aspect-auto md:h-full">
                 <img src={collection.image} alt={collection.name} className="h-full w-full object-cover" />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10" />
@@ -1827,7 +1827,7 @@ function CollectionDetailPage({
                     key={`${product.id}-${index}`}
                     href={productHref(product.id)}
                     onClick={(event) => handleInternalLink(event, () => onViewProduct(product.id))}
-                    className="group relative aspect-[3/4] min-h-0 overflow-hidden bg-secondary md:aspect-auto md:h-full"
+                    className="group relative aspect-[4/5] min-h-0 overflow-hidden bg-secondary md:aspect-auto md:h-full"
                     aria-label={`Տեսնել ${product.name} զարդատեսակը`}
                   >
                     <img
