@@ -718,7 +718,6 @@ function CollectionsPreview({
               <img src={col.image} alt={col.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-                <p className="font-body text-[9px] tracking-[0.25em] text-primary/80 uppercase mb-1">{col.count} զարդատեսակ</p>
                 <h3 className="font-heading text-base md:text-lg tracking-wide text-white leading-snug">{col.name}</h3>
                 <p className="mt-1 font-heading text-xs tracking-wide text-primary">{formatAmdPrice(col.price)}</p>
                 {i === 0 && <p className="font-body text-xs text-white/60 mt-1.5 leading-relaxed hidden md:block">{col.tagline}</p>}
